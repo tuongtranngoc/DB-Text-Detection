@@ -16,16 +16,16 @@ class Visualization:
         isClosed = True
         color = (255, 0, 0)
         thickness = 2
+        image = DataUtils.image_to_numpy(image)
         image = np.array(image, np.uint8)
         polygon = np.array(polygon, np.int32)
         for pts in polygon:
             pts = pts.reshape((-1, 1, 2))
-            print(pts)
-            image = cv2.polylines(image, [pts], 
-                                isClosed, color, thickness)
+            image = cv2.polylines(image, [pts], isClosed, color, thickness)
         return image
     
     @classmethod
-    def save_debug(image, save_dir, basename):
+    def save_debug(cls, image, save_dir, basename):
+        os.makedirs(save_dir, exist_ok=True)
         save_path = os.path.join(save_dir, basename)
         cv2.imwrite(save_path, image)

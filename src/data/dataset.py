@@ -36,14 +36,14 @@ class ICDAR2015Dataset(Dataset):
                     anno = anno.strip().strip('\ufeff').strip('\xef\xbb\xbf').split(',')[:8]
                     polygon = [int(a) for a in anno]
                     polygon_list.append(polygon)
-            dataset.append([img_path, np.array(polygon_list, np.float32).reshape((-1, 4, 2))])
+            dataset.append([img_path, np.array(polygon_list, np.float32).reshape((-1, 4, 2)).tolist()])
         return dataset
     
     def get_image_label(self, img_pth, label, is_aug):
         image = cv2.imread(img_pth)
         if is_aug:
             image, label = self.transform.augment(image, label)
-        image = self.transform.transform(image)
+        image, label = self.transform.transform(image, label)
         return image, label
 
 

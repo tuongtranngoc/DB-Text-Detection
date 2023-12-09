@@ -12,4 +12,4 @@ dataset = ICDAR2015Dataset('Train')
 for i in tqdm(range(10)):
     image, label = dataset[i]
     image = Visualization.draw_polygon(image, label)
-    Visualization.save_debug(image, cfg['Debug']['dataset'], str(i))
+    Visualization.save_debug(image, cfg['Debug']['dataset'], f'{i}.png')

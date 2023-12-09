@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import numpy as np
 import albumentations as A
+import albumentations.augmentations.geometric as A_geo
 from albumentations.pytorch.transforms import ToTensorV2
 
 from . import cfg
@@ -17,8 +18,11 @@ class TransformDB(object):
         self.image_size = cfg['Train']['dataset']['transforms']['image_shape']
         # image transformation
         self.__tranform = A.Compose([
-            A.Normalize(),
-            ToTensorV2()])
+            A.Resize(self.image_size[1], self.image_size[2]),
+            A.Normalize(always_apply=True),
+            ToTensorV2()],
+            keypoint_params=A.KeypointParams(format='xy', remove_invisible=False))
+        
         # image augmentation
         self.__augment = A.Compose([
             A.SafeRotate(limit=[-5, 5], p=0.3),
@@ -27,27 +31,18 @@ class TransformDB(object):
             A.MedianBlur(p=0.1, blur_limit=5),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3)
         ])
-
-    def resize_padding(self, image):
-        imgC, imgH, imgW = self.image_size
-        h, w, __ = image.shape
-        ratio = w / float(h)
-        if math.ceil(imgH * ratio) > imgW:
-            resized_w = imgW
-        else:
-            resized_w = int(math.ceil(imgH * ratio))
-        resized_image = cv2.resize(image, (resized_w, imgH))
-        resized_image = resized_image.astype(np.float32)
-        padding_im = np.ones((imgH, imgW, imgC) ,dtype=resized_image.dtype) * 128
-        padding_im[:, 0:resized_w, :] = resized_image
-        padding_im = padding_im[..., ::-1]
-        return padding_im
     
-    def transform(self, image):
-        image = self.resize_padding(image)
-        transformed = self.__tranform(image=image)
+    def transform(self, image, label):
+        """Reference: https://github.com/albumentations-team/albumentations/issues/750
+        """
+        label = np.array(label, np.float32).reshape(-1, 2).tolist()
+        label = [val + [i] for i, val in enumerate(label)]
+        transformed = self.__tranform(image=image, keypoints=label)
         transformed_image = transformed['image']
-        return transformed_image
+        transformed_label = [i[:-1] for i in sorted(transformed['keypoints'], key=lambda x: x[2])]
+        transformed_label = [[max(min(x[0], self.image_size[1]-1), 0), max(min(x[1], self.image_size[1]-1), 0)] for x in transformed_label]
+        transformed_label = np.array(transformed_label, np.float32).reshape(-1, 4, 2)
+        return transformed_image, transformed_label
         
     def augment(self, image):
         augmented = self.__augment(image=image)
