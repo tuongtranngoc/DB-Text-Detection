@@ -1,2 +1,16 @@
-# DeepLearning-template
-A standardized template for building deep learning models.
+# Real-time Scence Text Detection with Differentibale Binarization
+
+## Introduction
+
+## Evironment
+
+## Data preparation
+
+## Training
+
+## Evaluation
+
+## Prediction
+
+## Reference
+

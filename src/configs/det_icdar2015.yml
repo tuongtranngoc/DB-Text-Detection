@@ -1,0 +1,48 @@
+Global:
+  device: cuda
+  resume_training: False
+
+Optimizer:
+  lr: 0.0005
+
+Train:
+  dataset:
+    name: cidar15
+    image_dir: dataset/icdar2015/train/images
+    anno_dir: dataset/icdar2015/train/gt
+    transforms:
+      image_shape: [3, 640, 640]
+      augmentation: False
+
+  loader:
+    epochs: 20
+    eval_step: 1
+    shuffle: True
+    batch_size: 512
+    num_workers: 8
+    use_shared_memory: False
+
+  checkpoint:
+    last_path: weights/last.pth
+    best_path: weights/best.pth
+
+Eval:
+  dataset:
+    name: cidar15
+    data_dir: dataset/icdar2015/test
+    anno_dir: dataset/icdar2015/test/gt
+    transforms:
+      image_shape: [3, 640, 640]
+      augmentation: False
+
+  loader:
+    shuffle: False
+    batch_size: 256
+    num_workers: 4
+    use_shared_memory: False
+
+Debug:
+  transforms: debugs/transformation
+  log_file: 'logs/crnn.log'
+  tensorboard: debugs/tensorboard
+  dataset: 'debugs/dataset'
