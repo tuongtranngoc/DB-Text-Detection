@@ -10,6 +10,9 @@ from . import cfg
 
 
 class TransformDB(object):
+    """Using augmentation of keypoints from albumentation
+    Reference: https://albumentations.ai/docs/examples/example_keypoints/
+    """
     def __init__(self) -> None:
         self.image_size = cfg['Train']['dataset']['transforms']['image_shape']
         # image transformation

@@ -48,3 +48,15 @@ class DataUtils:
             return image
         else:
             raise Exception(f"{image} is a type of {type(image)}, not numpy/tensor type")
+        
+    def order_points_clockwise(cls, points: np.ndarray):
+        rect = np.zeros((4, 2), dtype=np.float32)
+        s = points.sum(axis=1)
+        rect[0] = points[np.argmin(s)]
+        rect[2] = points[np.argmax(s)]
+        diff = np.diff(points, axis=1)
+        rect[1] = points[np.argmin(diff)]
+        rect[3] = points[np.argmax(diff)]
+        return rect
+    
+    

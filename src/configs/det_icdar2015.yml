@@ -10,6 +10,7 @@ Train:
     name: cidar15
     image_dir: dataset/icdar2015/train/images
     anno_dir: dataset/icdar2015/train/gt
+    ignore_tags: ['*', '###']
     transforms:
       image_shape: [3, 640, 640]
       augmentation: True
@@ -33,6 +34,7 @@ Eval:
     name: cidar15
     data_dir: dataset/icdar2015/test
     anno_dir: dataset/icdar2015/test/gt
+    ignore_tags: ['*', '###']
     transforms:
       image_shape: [3, 640, 640]
       augmentation: False

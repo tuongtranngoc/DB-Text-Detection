@@ -20,6 +20,7 @@ class ICDAR2015Dataset(Dataset):
         self.img_dir = cfg[self.mode]['dataset']['image_dir']
         self.anno_dir = cfg[self.mode]['dataset']['anno_dir']
         self.image_size = cfg[self.mode]['dataset']['transforms']['image_shape']
+        self.ignore_tags = cfg[self.mode]['dataset']['ignore_tags']
         self.transform = TransformDB()
         self.dataset = self.load_dataset()
 
@@ -41,7 +42,7 @@ class ICDAR2015Dataset(Dataset):
     
     def get_image_label(self, img_pth, label, is_aug):
         image = cv2.imread(img_pth)
-        if is_aug:
+        if is_aug: 
             image, label = self.transform.augment(image, label)
         image, label = self.transform.transform(image, label)
         return image, label
