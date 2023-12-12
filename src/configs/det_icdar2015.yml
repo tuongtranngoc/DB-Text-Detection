@@ -52,3 +52,4 @@ Debug:
   log_file: 'logs/crnn.log'
   tensorboard: debugs/tensorboard
   dataset: 'debugs/dataset'
+  label_generation: 'debugs/label_generation'

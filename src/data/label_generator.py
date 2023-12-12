@@ -31,6 +31,7 @@ def shrink_polygon_pyclipper(polygon, shrink_ratio):
         shrinked = np.array(shrinked[0]).reshape(-1, 2)
     return shrinked
 
+
 class LabelGenerator(object):
     def __init__(self, shrink_ratio=0.4, min_text_size=8, shrink_type='pyclipper') -> None:
         shrink_func_dict = {
@@ -42,10 +43,9 @@ class LabelGenerator(object):
         self.min_text_size = min_text_size
         self.shrink_type = shrink_type
 
-    def __call__(self, data):
-        image, polygons = data
+    def __call__(self, image, polygons):
         h,w = image.shape[:2]
-        polygons = self.validate_polygons(polygons)
+        polygons = self.validate_polygons(polygons, h, w)
         gt = np.zeros((h, w), dtype=np.float32)
         mask = np.ones((h, w), dtype=np.float32)
         for i in range(len(polygons)):
