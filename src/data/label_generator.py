@@ -48,6 +48,7 @@ class LabelGenerator(object):
         polygons = self.validate_polygons(polygons, h, w)
         gt = np.zeros((h, w), dtype=np.float32)
         mask = np.ones((h, w), dtype=np.float32)
+        # import ipdb; ipdb.set_trace()
         for i in range(len(polygons)):
             polygon = polygons[i]
             height = max(polygon[:, 1]) - min(polygon[:, 1])
