@@ -2,9 +2,9 @@
 
 # Label generation
 
-<p align='center'>
-    <img src="/images/label_generation.png">
-</p>
+<figure>
+    <img align="center" src="/images/label_generation.png">
+</figure>
 From the text image, each polygon of its text regions is described by a set of segments:
 
 $$G=\lbrace S_n \rbrace_{k=1}^n$$
