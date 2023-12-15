@@ -17,7 +17,7 @@ dataset = ICDAR2015Dataset('Eval')
 label_generate = LabelGenerator()
 shrink_ratio = 0.4
 
-for i in tqdm(range(0,10), desc="Debug for shrink map..."):
+for i in tqdm(range(20,30), desc="Debug for shrink map..."):
     image, label = dataset[i]
     image = DataUtils.image_to_numpy(image)
     polygon = label[0]
