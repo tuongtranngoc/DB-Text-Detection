@@ -15,5 +15,5 @@ for i in tqdm(range(10), desc="Debug for Label Generation ..."):
     image, label = dataset[i]
     image = DataUtils.image_to_numpy(image)
     image, gt, mask = LabelGenerator()(image, label)
-    Visualization.save_debug((gt+1)*255, cfg['Debug']['label_generation'], f"{i}_gt.png")
+    Visualization.save_debug((gt)*255, cfg['Debug']['label_generation'], f"{i}_gt.png")
     Visualization.save_debug(mask*255, cfg['Debug']['label_generation'], f"{i}_mask.png")

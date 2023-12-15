@@ -32,5 +32,5 @@ for i in tqdm(range(10)):
     # import ipdb; ipdb.set_trace()
     image = Visualization.draw_polygon(image, label, color=(255, 0, 0))
     polygons = validate_polygons(label, h, w)
-    # image = Visualization.draw_polygon(image, polygons, color=(0, 0, 255))
+    image = Visualization.draw_polygon(image, polygons, color=(0, 0, 255))
     Visualization.save_debug(image, cfg['Debug']['validate_polygons'], f"{i}.png")
