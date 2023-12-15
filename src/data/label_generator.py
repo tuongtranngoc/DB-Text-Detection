@@ -61,7 +61,7 @@ class LabelGenerator(object):
                     continue
                 cv2.fillPoly(gt, [shrinked.astype(np.int32)], 1)
         return image, gt, mask
-
+    
     def validate_polygons(self, polygons, h, w):
         for polygon in polygons:
             polygon[:, 0] = np.clip(polygon[:, 0], 0, w-1)
