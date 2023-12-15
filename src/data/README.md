@@ -23,7 +23,7 @@ To generate labels for threshold map. Firstly the text polygon $G$ is dilated wi
 
 ## Experiment on the ICDAR2015 dataset
 
-Based on `pyclipper` and `Polygon` libraries, we compute offset $D$ from the perimeter $L$ and area $D$ of the original polygon:
+Based on `pyclipper` and `Polygon` libraries, we compute offset $D$ from the perimeter $L$ and area $A$ of the original polygon:
 
 ```python
 from __future__ import division
