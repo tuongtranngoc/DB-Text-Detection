@@ -42,7 +42,9 @@ def shrink_polygon_pyclipper(polygon, shrink_ratio):
     subject = [tuple(l) for l in polygon]
     padding = pyclipper.PyclipperOffset()
     padding.AddPath(subject, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
-    # Compute plygon G
+    # Compute plygon G_s or G_s
+    # G_s: shrinked = padding.Execute(-distance)
+    # G_d: shrinked = padding.Execute(distance)
     shrinked = padding.Execute(-distance)
     if shrinked == []:
         shrinked = np.array(shrinked)
