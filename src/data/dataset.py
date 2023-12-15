@@ -20,12 +20,13 @@ class ICDAR2015Dataset(Dataset):
         self.img_dir = cfg[self.mode]['dataset']['image_dir']
         self.anno_dir = cfg[self.mode]['dataset']['anno_dir']
         self.image_size = cfg[self.mode]['dataset']['transforms']['image_shape']
+        self.ignore_tags = cfg[self.mode]['dataset']['ignore_tags']
         self.transform = TransformDB()
         self.dataset = self.load_dataset()
 
     def load_dataset(self):
         dataset = []
-        for img_path in tqdm(glob.glob(os.path.join(self.img_dir, "*.jpg"))):
+        for img_path in tqdm(glob.glob(os.path.join(self.img_dir, "*.jpg")), desc=f"Loading dataset for {self.mode}"):
             basename = os.path.basename(img_path).split('.jpg')[0]
             anno_path = os.path.join(self.anno_dir, 'gt_' + basename + '.txt')
             if not os.path.exists(anno_path): continue
@@ -36,14 +37,14 @@ class ICDAR2015Dataset(Dataset):
                     anno = anno.strip().strip('\ufeff').strip('\xef\xbb\xbf').split(',')[:8]
                     polygon = [int(a) for a in anno]
                     polygon_list.append(polygon)
-            dataset.append([img_path, np.array(polygon_list, np.float32).reshape((-1, 4, 2))])
+            dataset.append([img_path, np.array(polygon_list, np.float32).reshape((-1, 4, 2)).tolist()])
         return dataset
     
     def get_image_label(self, img_pth, label, is_aug):
-        image = cv2.imread(img_pth)
-        if is_aug:
+        image = cv2.imread(img_pth)[..., ::-1]
+        if is_aug: 
             image, label = self.transform.augment(image, label)
-        image = self.transform.transform(image)
+        image, label = self.transform.transform(image, label)
         return image, label
 
 
