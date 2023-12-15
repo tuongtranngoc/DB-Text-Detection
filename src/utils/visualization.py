@@ -11,14 +11,14 @@ from . import *
 class Visualization:
 
     @classmethod
-    def draw_polygon(cls, image, polygon):
+    def draw_polygon(cls, image, polygon, color=(255, 0, 0)):
         # polygon: x1, y1, x2, y2, x3, y3, x4, y4
         isClosed = True
-        color = (255, 0, 0)
         thickness = 2
-        image = DataUtils.image_to_numpy(image)
         image = np.array(image, np.uint8)
         polygon = np.array(polygon, np.int32)
+        if polygon.ndim <= 2:
+            polygon = [polygon]
         for pts in polygon:
             pts = pts.reshape((-1, 1, 2))
             image = cv2.polylines(image, [pts], isClosed, color, thickness)

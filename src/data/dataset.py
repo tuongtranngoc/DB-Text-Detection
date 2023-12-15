@@ -26,7 +26,7 @@ class ICDAR2015Dataset(Dataset):
 
     def load_dataset(self):
         dataset = []
-        for img_path in tqdm(glob.glob(os.path.join(self.img_dir, "*.jpg"))):
+        for img_path in tqdm(glob.glob(os.path.join(self.img_dir, "*.jpg")), desc=f"Loading dataset for {self.mode}"):
             basename = os.path.basename(img_path).split('.jpg')[0]
             anno_path = os.path.join(self.anno_dir, 'gt_' + basename + '.txt')
             if not os.path.exists(anno_path): continue
@@ -41,7 +41,7 @@ class ICDAR2015Dataset(Dataset):
         return dataset
     
     def get_image_label(self, img_pth, label, is_aug):
-        image = cv2.imread(img_pth)
+        image = cv2.imread(img_pth)[..., ::-1]
         if is_aug: 
             image, label = self.transform.augment(image, label)
         image, label = self.transform.transform(image, label)

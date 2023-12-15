@@ -35,8 +35,8 @@ def shrink_polygon_pyclipper(polygon, shrink_ratio):
 class LabelGenerator(object):
     def __init__(self, shrink_ratio=0.4, min_text_size=8, shrink_type='pyclipper') -> None:
         shrink_func_dict = {
-            'py': None,
-            'pyclipper': None
+            'py': shrink_polygon_py,
+            'pyclipper': shrink_polygon_pyclipper
         }
         self.shrink_func = shrink_func_dict[shrink_type]
         self.shrink_ratio = shrink_ratio
@@ -60,7 +60,7 @@ class LabelGenerator(object):
                     cv2.fillPoly(mask, polygon.astype(np.int32)[np.newaxis, :, :], 0)
                     continue
                 cv2.fillPoly(gt, [shrinked.astype(np.int32)], 1)
-        return gt, mask
+        return image, gt, mask
 
     def validate_polygons(self, polygons, h, w):
         for polygon in polygons:
