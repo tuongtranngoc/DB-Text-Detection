@@ -2,8 +2,16 @@
 
 # Label generation
 
+<style>
+    figure {
+        align: center;
+        width: 70%;
+        display: block;
+}
+</style>
+
 <figure>
-    <img align="center" src="/images/label_generation.png">
+    <img src="/images/label_generation.png">
 </figure>
 From the text image, each polygon of its text regions is described by a set of segments:
 
