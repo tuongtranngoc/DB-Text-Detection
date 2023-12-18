@@ -5,7 +5,7 @@
 ## Generation Mechanism
 
 <p align="center">
-    <img src="/images/label_generation.png">
+    <img src="../../images/label_generation.png">
 </p>
 
 The label generation for the probability map is inspired by [PSENet](https://arxiv.org/abs/1903.12473). Given a text image, each polygon of its text regions is described by a set of segments:

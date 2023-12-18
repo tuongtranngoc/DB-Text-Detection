@@ -10,9 +10,9 @@ import torch.nn.functional as F
 import torchvision
 
 
-class ResNetDB(nn.Module):
+class BackboneDB(nn.Module):
     def __init__(self) -> None:
-        super(ResNetDB, self).__init__()
+        super(BackboneDB, self).__init__()
         backbone = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
         self.conv1 = backbone.conv1
         self.bn1 = backbone.bn1
@@ -39,6 +39,6 @@ class ResNetDB(nn.Module):
 
 if __name__ == "__main__":
     x = torch.randn(1, 3, 640, 640)
-    net = ResNetDB()
+    net = BackboneDB()
     y = net(x)
     import ipdb; ipdb.set_trace()
