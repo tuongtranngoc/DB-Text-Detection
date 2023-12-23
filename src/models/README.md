@@ -87,7 +87,7 @@ $C_4 = up_{\times4}(conv_{3 \times 3}(C_4))$
 
 $C_5 = up_{\times8}(conv_{3 \times 3}(C_5))$
 
-$F = C_1+C_2+C_3+C_4$
+$=> F = C_2+C_3+C_4+C_5$
 
 **Notion**
 
@@ -135,5 +135,3 @@ where $B$ is the approximate binary map, $T$ is the threshold map and $P$ is the
 def approximate_step_function(P, T, k=50):
     return torch.reciprocal(1 + torch.exp(-k * (P - T)))
 ```
-
-## 4. Post-processing
