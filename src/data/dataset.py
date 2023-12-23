@@ -16,11 +16,11 @@ class ICDAR2015Dataset(Dataset):
     def __init__(self, mode) -> None:
         super(ICDAR2015Dataset, self).__init__()
         self.mode = mode
-        self.is_aug = cfg[self.mode]['dataset']['transforms']['augmentation']
         self.img_dir = cfg[self.mode]['dataset']['image_dir']
         self.anno_dir = cfg[self.mode]['dataset']['anno_dir']
-        self.image_size = cfg[self.mode]['dataset']['transforms']['image_shape']
         self.ignore_tags = cfg[self.mode]['dataset']['ignore_tags']
+        self.is_aug = cfg[self.mode]['dataset']['transforms']['augmentation']
+        self.image_size = cfg[self.mode]['dataset']['transforms']['image_shape']
         self.transform = TransformDB()
         self.dataset = self.load_dataset()
 
