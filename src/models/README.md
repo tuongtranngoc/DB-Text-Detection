@@ -62,4 +62,39 @@ class BackboneDB(nn.Module):
 ```
 
 ## 2. Neck Network
-Next, the features are up-sampled to the same scale by using Conv+Bn+ReLu module
+<p align="center">
+    <img src="../../images/NECK.png">
+</p>
+
+Assume that, features from the backbone network $C = \lbrace C_1, C_2, C_3, C_4, C_5 \rbrace$.
+Next, the features are up-sampled to the same scale and cascaded to produce feature $F$ following steps:
+
+**Upscales and element-wise sum of features from C5 to C2**
+
+$C_4 = C_4 \oplus up_{\times2}(C_5)$
+
+$C_3 = C_3 \oplus up_{\times2}(C_4)$
+
+$C_2 = C_2 \oplus up_{\times2}(C_3)$
+
+**Upscale features to the same scale and concatenate them together**
+
+$C_2 = conv_{3 \times 3}(C_2)$
+
+$C_3 = up_{\times2}(conv_{3 \times 3}(C_3))$
+
+$C_4 = up_{\times4}(conv_{3 \times 3}(C_4))$
+
+$C_5 = up_{\times8}(conv_{3 \times 3}(C_5))$
+
+$F = C_1+C_2+C_3+C_4$
+
+**Notion**
+
+$\oplus$: Element-wise
+
+$up_{\times N}$: Interpolate function in Pytorch
+
+$conv_{3\times 3}$: Conv 3x3 + BN + ReLu
+
+## 3. Head Network

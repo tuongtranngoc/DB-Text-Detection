@@ -18,7 +18,6 @@ class BackboneDB(nn.Module):
         self.relu = backbone.relu
         self.maxpool = backbone.maxpool
         # Features
-        import ipdb; ipdb.set_trace()
         self.layer1 = backbone.layer1 # 1/4
         self.layer2 = backbone.layer2 # 1/8
         self.layer3 = backbone.layer3 # 1/16
@@ -29,7 +28,6 @@ class BackboneDB(nn.Module):
                              self.layer3[-1].conv2.out_channels,
                              self.layer4[-1].conv2.out_channels]
 
-    
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)

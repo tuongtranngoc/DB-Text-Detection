@@ -14,7 +14,7 @@ class NeckDB(nn.Module):
         super().__init__()
         self.conv_out = inner_channels
         inplace = True
-        # reduce layers
+        # Reduce layers
         self.reduce_conv_c2 = ConvBnRelu(in_channels[0], inner_channels, kernel_size=1, inplace=inplace)
         self.reduce_conv_c3 = ConvBnRelu(in_channels[1], inner_channels, kernel_size=1, inplace=inplace)
         self.reduce_conv_c4 = ConvBnRelu(in_channels[2], inner_channels, kernel_size=1, inplace=inplace)
@@ -23,7 +23,7 @@ class NeckDB(nn.Module):
         for __ in range(fpem_repeat):
             self.fpems.append(FPEM(self.conv_out))
         self.out_channels = self.conv_out * 4
-    
+
     def forward(self, x):
         c2, c3, c4, c5 = x
         # Reduce into the same channel
@@ -45,7 +45,6 @@ class NeckDB(nn.Module):
                 c3_ffm += c3
                 c4_ffm += c4
                 c5_ffm += c5
-
         # FFM
         c5 = F.interpolate(c5_ffm, c2_ffm.size()[-2:])
         c4 = F.interpolate(c4_ffm, c2_ffm.size()[-2:])
