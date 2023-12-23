@@ -11,7 +11,7 @@ dataset = ICDAR2015Dataset('Eval')
 label_generate = LabelGenerator()
 
 
-for i in tqdm(range(10), desc="Debug for Label Generation ..."):
+for i in tqdm(range(30), desc="Debug for Label Generation ..."):
     image, label = dataset[i]
     image = DataUtils.image_to_numpy(image)
     image, gt, mask = LabelGenerator()(image, label)

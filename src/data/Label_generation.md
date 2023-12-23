@@ -5,7 +5,7 @@
 ## Generation Mechanism
 
 <p align="center">
-    <img src="/images/label_generation.png">
+    <img src="../../images/label_generation.png">
 </p>
 
 The label generation for the probability map is inspired by [PSENet](https://arxiv.org/abs/1903.12473). Given a text image, each polygon of its text regions is described by a set of segments:
@@ -55,9 +55,10 @@ def shrink_polygon_pyclipper(polygon, shrink_ratio):
 
 And some examples from the `Icdar2015` dataset with $n$ = 4 (number of vertexes):
 
-<p align="center">
-    <img src="/images/shrink_map_21.png">
-    <img src="/images/shrink_map_27.png">
-    <img src="/images/shrink_map_4.png">
-</p>
+| <p align=center>threshold map</p>| <p align='center'>probability map</p> | 
+|--|--|
+| <img src="../../images/shrink_map_21.png" width=320> | <img src="../../images/21_gt.png" width=320> |
+| <img src="../../images/shrink_map_27.png" width=320> | <img src="../../images/27_gt.png" width=320> |
+
+
 
