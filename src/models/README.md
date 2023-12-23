@@ -91,10 +91,11 @@ $F = C_1+C_2+C_3+C_4$
 
 **Notion**
 
-$\oplus$: Element-wise
-
-$up_{\times N}$: Interpolate function in Pytorch
-
-$conv_{3\times 3}$: Conv 3x3 + BN + ReLu
+|Symbol| Meaning|
+|--|--|
+|$\oplus$| Element-wise|
+|$up_{\times N}$| Interpolate function in Pytorch|
+|$conv_{3\times 3}$| Conv 3x3 + BN + ReLu|
+|$+$ | Concatenate |
 
 ## 3. Head Network
