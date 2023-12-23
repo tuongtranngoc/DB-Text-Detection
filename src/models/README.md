@@ -99,3 +99,41 @@ $F = C_1+C_2+C_3+C_4$
 |$+$ | Concatenate |
 
 ## 3. Head Network
+Before having the final result with a polygon/bounding box of text, we need to process two important predictions: **probability map**, **threshold map** and **approximate binary map**.
+
+**probability map** is a binary feature map, the predicted area of text is `1` value, otherwise is `0` value. From the $F$ feature in the Neck network, we use a binary module to map $F \to P$:
+
+```python
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+
+import torch
+from torch import nn
+
+
+binarize = nn.Sequential(
+        nn.Conv2d(in_channels, in_channels // 4, 3, padding=1),
+        nn.BatchNorm2d(in_channels // 4),
+        nn.ReLU(inplace=True),
+        nn.ConvTranspose2d(in_channels // 4, in_channels // 4, 2, 2),
+        nn.BatchNorm2d(in_channels // 4),
+        nn.ReLU(inplace=True),
+        nn.ConvTranspose2d(in_channels // 4, 1, 2, 2),
+        nn.Sigmoid())
+```
+
+**threshold map** is also a binary feature map, the predicted boundary line of text is `0` value, otherwise is `1` value. From the $F$ feature in the Neck network, we use a thresh module to map $F \to T$
+
+Finally, the **approximate binary map** is predicted by an approximate step function:
+
+$$B = \frac{1}{1+e^{k(P-T)}}$$
+
+where $B$ is the approximate binary map, $T$ is the threshold map and $P$ is the probability map.
+
+```python
+def approximate_step_function(P, T, k=50):
+    return torch.reciprocal(1 + torch.exp(-k * (P - T)))
+```
+
+## 4. Post-processing
