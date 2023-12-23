@@ -23,7 +23,7 @@ class NeckDB(nn.Module):
         for __ in range(fpem_repeat):
             self.fpems.append(FPEM(self.conv_out))
         self.out_channels = self.conv_out * 4
-
+    
     def forward(self, x):
         c2, c3, c4, c5 = x
         # Reduce into the same channel

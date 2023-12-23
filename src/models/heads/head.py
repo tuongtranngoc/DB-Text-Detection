@@ -25,7 +25,7 @@ class HeadDB(nn.Module):
 
         self.thresh = self._init_thresh(in_channels)
         self.thresh.apply(self.weights_init)
-
+    
     def forward(self, x):
         shrink_maps = self.binarize(x)
         threshold_maps = self.thresh(x)
