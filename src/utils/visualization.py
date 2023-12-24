@@ -6,9 +6,14 @@ import os
 import cv2
 import numpy as np
 
+import torch
+import torch.nn as nn
+
 from . import *
 
 class Visualization:
+    C, H, W = cfg['Train']['dataset']['transforms']['image_shape']
+    device = cfg['Global']['device']
 
     @classmethod
     def draw_polygon(cls, image, polygon, color=(255, 0, 0)):
@@ -29,3 +34,14 @@ class Visualization:
         os.makedirs(save_dir, exist_ok=True)
         save_path = os.path.join(save_dir, basename)
         cv2.imwrite(save_path, image)
+
+    @classmethod
+    def model_debug(cls, model:nn.Module):
+        from torchview import draw_graph
+        x = torch.randn(size=(cls.C, cls.H, cls.W)).to(cls.device)
+        model.to(cls.device)
+        draw_graph(model, input_size=x.unsqueeze(0).shape,
+                   expand_nested=True,
+                   save_graph=True,
+                   directory=cfg['Debug']['model'],
+                   graph_name='resnet18')
