@@ -7,11 +7,11 @@ from tqdm import tqdm
 from src.data.dataset import ICDAR2015Dataset
 
 
-dataset = ICDAR2015Dataset('Eval')
+dataset = ICDAR2015Dataset('Train')
 
 
-for i in tqdm(range(30), desc="Debug for Label Generation ..."):
-    image, shrink_map, shrink_mask, border_map, border_mask = dataset[i]
+for i in tqdm(range(len(dataset)), desc="Debug for Label Generation ..."):
+    image, (shrink_map, shrink_mask, border_map, border_mask) = dataset[i]
     image = DataUtils.image_to_numpy(image)
     Visualization.save_debug((shrink_map)*255, cfg['Debug']['label_generation'], f"{i}_shrink_map.png")
     Visualization.save_debug(shrink_mask*255, cfg['Debug']['label_generation'], f"{i}_shrink_mask.png")

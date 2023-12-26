@@ -59,7 +59,7 @@ class ShrinkGenerator(object):
         for polygon in polygons:
             polygon[:, 0] = np.clip(polygon[:, 0], 0, w-1)
             polygon[:, 1] = np.clip(polygon[:, 1], 0, h-1)
-        
+
         for i in range(len(polygons)):
             area = cv2.contourArea(polygons[i])
             if area > 0:
@@ -93,8 +93,9 @@ class BorderGenerator(object):
         subject = [tuple(l) for l in polygons]
         padding = pyclipper.PyclipperOffset()
         padding.AddPath(subject, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
-
-        padded_polygon = np.array(padding.Execute(distance)[0])
+        padded_polygon = padding.Execute(distance)
+        if len(padded_polygon) == 0: return
+        padded_polygon = np.array(padded_polygon[0])
         cv2.fillPoly(mask, [padded_polygon.astype(np.int32)], 1.0)
 
         xmin = padded_polygon[:, 0].min()
