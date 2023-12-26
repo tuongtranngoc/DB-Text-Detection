@@ -11,6 +11,6 @@ class DiffBinarizationLoss(nn.Module):
     def __init__(self, alpha=1.0, beta=10):
         self.probability_map_loss = nn.BCELoss()
         self.binary_map_loss = nn.BCELoss()
-
+    
     def forward(self, x):
         pass

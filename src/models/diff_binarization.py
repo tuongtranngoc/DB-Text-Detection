@@ -16,7 +16,7 @@ class DiffBinarization(nn.Module):
         self.backbone = BackboneDB()
         self.neck = NeckDB(self.backbone.out_channels)
         self.head = HeadDB(self.neck.out_channels)
-    
+        
     def forward(self, x):
         __, __, H, W  = x.size()
         y = self.backbone(x)

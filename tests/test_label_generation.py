@@ -5,15 +5,15 @@ from __future__ import absolute_import
 from . import *
 from tqdm import tqdm
 from src.data.dataset import ICDAR2015Dataset
-from src.data.label_generator import LabelGenerator
 
 dataset = ICDAR2015Dataset('Eval')
-label_generate = LabelGenerator()
 
 
 for i in tqdm(range(30), desc="Debug for Label Generation ..."):
-    image, label = dataset[i]
+    image, shrink_map, shrink_mask, border_map, border_mask = dataset[i]
     image = DataUtils.image_to_numpy(image)
-    image, gt, mask = LabelGenerator()(image, label)
-    Visualization.save_debug((gt)*255, cfg['Debug']['label_generation'], f"{i}_gt.png")
-    Visualization.save_debug(mask*255, cfg['Debug']['label_generation'], f"{i}_mask.png")
+    import ipdb; ipdb.set_trace()
+    Visualization.save_debug((shrink_map)*255, cfg['Debug']['label_generation'], f"{i}_shrink_map.png")
+    Visualization.save_debug(shrink_mask*255, cfg['Debug']['label_generation'], f"{i}_shrink_mask.png")
+    Visualization.save_debug((border_map)*255, cfg['Debug']['label_generation'], f"{i}_border_map.png")
+    Visualization.save_debug(border_mask*255, cfg['Debug']['label_generation'], f"{i}_boder_mask.png")
