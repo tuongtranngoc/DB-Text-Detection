@@ -81,7 +81,7 @@ class Trainer:
                 metrics['binary_maps_loss'].update(loss['binary_maps_loss'])
                 metrics['total_loss'].update(loss['total_loss'])
                 
-                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - total_loss: {metrics['total_loss'].get_value(): .4f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value(): .4f}- thresh_maps_loss: {metrics['thresh_maps_loss'].get_value(): .4f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value(): .4f}", end='\r')
+                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - total_loss: {metrics['total_loss'].get_value(): .4f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value(): .4f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value(): .4f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value(): .4f}", end='\r')
                 
                 Tensorboard.add_scalars("train_loss", epoch, total_loss=metrics['total_loss'].get_value("mean"))
 

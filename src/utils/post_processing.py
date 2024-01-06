@@ -20,7 +20,7 @@ class PostProcessor():
         self.max_candidates = max_candidates
         self.unclip_ratio = unclip_ratio
 
-    def __call__(self, inputs, preds, is_output_polygon):
+    def __call__(self, inputs, preds, is_output_polygon=True):
         pred = preds[:, 0, :, :]
         segmentation = self.binarize(pred)
         boxes_batch = []
@@ -55,14 +55,16 @@ class PostProcessor():
             eps = 0.005 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, eps, True)
             points = approx.reshape((-1, 2))
+
             if points.shape[0] < 4: continue
 
             score = self.box_score_fast(pred, contour.squeeze(1))
+
             if score < self.box_thresh: continue
 
             if points.shape[0] > 2:
                 box = self.unclip(points, unclip_ratio=self.unclip_ratio)
-                if len(box) > 0: continue
+                if len(box) > 1: continue
             else:
                 continue
         
@@ -73,7 +75,7 @@ class PostProcessor():
             if not isinstance(imgw, int):
                 imgw = imgw.item()
                 imgh = imgh.item()
-
+            print(box, score)
             box[:, 0] = np.clip(np.round(box[:, 0] / w * imgw), 0, imgw)
             box[:, 1] = np.clip(np.round(box[:, 1] / h * imgh), 0, imgh)
             boxes.append(box)
