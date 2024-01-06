@@ -67,7 +67,7 @@ class Trainer:
                 self.optimizer.zero_grad()
                 loss['total_loss'].backward()
                 self.optimizer.step()
-
+                
                 print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - loss: {loss['total_loss'].item()}", end='\r')
 
     def save_ckpt(self, save_path, best_acc, epoch):

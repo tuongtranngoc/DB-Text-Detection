@@ -4,6 +4,9 @@ from __future__ import absolute_import
 
 from . import cfg
 
+import numpy as np
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
+
 
 class BatchMeter(object):
     """Calculate average/sum value after each time
@@ -30,6 +33,24 @@ class BatchMeter(object):
             return self.sum
         else:
            return self.value
-        
 
-        
+
+class AccuracyMetric(object):
+    def __init__(self):
+        self.map_mt = MeanAveragePrecision(box_format='xyxy', iou_type='segm')
+
+    def compute_acc(self, pred_mask, pred_score, pred_class, gt_mask, gt_score, gt_class):
+        """Mean Average Precision (mAP)
+        Reference: https://torchmetrics.readthedocs.io/en/stable/detection/mean_average_precision.html
+        """
+        preds = [{
+            "masks": pred_mask,
+            "scores": pred_score,
+            "labels": pred_class
+        }]
+        target = [{
+            "masks": gt_mask,
+            "scores": gt_score,
+            "labels": gt_class
+        }]
+        self.map_mt.update(preds, target)
