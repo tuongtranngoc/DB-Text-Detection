@@ -13,7 +13,7 @@ class ConvBnRelu(nn.Module):
                               groups=groups, bias=bias, padding_mode=padding_mode)
         self.bn = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=inplace)
-
+    
     def forward(self, x):
         x = self.conv(x)
         x = self.bn(x)

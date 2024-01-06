@@ -24,6 +24,12 @@ class ICDAR2015Dataset(Dataset):
         self.transform = TransformDB()
         self.dataset = self.load_dataset()
 
+    def process_dataset(self, image, labels):
+        image = DataUtils.image_to_numpy(image)
+        ___, shrink_map, shrink_mask = ShrinkGenerator()(image, labels)
+        ___, border_map, border_mask = BorderGenerator()(image, labels)
+        return shrink_map, shrink_mask, border_map, border_mask
+
     def load_dataset(self):
         dataset = []
         for img_path in tqdm(glob.glob(os.path.join(self.img_dir, "*.jpg")), desc=f"Loading dataset for {self.mode}"):
@@ -34,26 +40,31 @@ class ICDAR2015Dataset(Dataset):
             with open(anno_path, 'r') as f_anno:
                 annos = f_anno.readlines()
                 for anno in annos:
-                    anno = anno.strip().strip('\ufeff').strip('\xef\xbb\xbf').split(',')[:8]
-                    polygon = [int(a) for a in anno]
+                    anno = anno.strip().strip('\ufeff').strip('\xef\xbb\xbf').split(',')
+                    polygon = anno[:8]
+                    text = str(anno[8])
+                    if text in self.ignore_tags: continue
+                    polygon = [int(a) for a in polygon]
+                    box = DataUtils.order_points_clockwise(np.array(polygon).reshape(-1, 2))
+                    if cv2.contourArea(box) <= 0: continue
                     polygon_list.append(polygon)
             dataset.append([img_path, np.array(polygon_list, np.float32).reshape((-1, 4, 2)).tolist()])
         return dataset
     
     def get_image_label(self, img_pth, label, is_aug):
         image = cv2.imread(img_pth)[..., ::-1]
-        if is_aug: 
+        if is_aug:
             image, label = self.transform.augment(image, label)
         image, label = self.transform.transform(image, label)
         return image, label
-
 
     def __len__(self): return len(self.dataset)
 
     def __getitem__(self, index):
         img_path, label = self.dataset[index]
         image, label = self.get_image_label(img_path, label, is_aug=self.is_aug)
-        return image, label
+        shrink_map, shrink_mask, border_map, border_mask = self.process_dataset(image, label)
+        return image, (shrink_map, shrink_mask, border_map, border_mask)
     
 
 if __name__ == "__main__":

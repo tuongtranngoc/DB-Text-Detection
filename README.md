@@ -1,8 +1,7 @@
-# Real-time Scence Text Detection with Differentibale Binarization
+# Real-time Scene Text Detection with Differentiable Binarization
 
 ## Introduction
-
-## Evironment
+Environment
 
 ## Data preparation
 
