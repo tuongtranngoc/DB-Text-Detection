@@ -9,8 +9,8 @@ from torch.utils.data import DataLoader
 
 from . import config as cfg
 
-import os
 import argparse
+import numpy as np
 from tqdm import tqdm
 
 from src.utils.logger import Logger
@@ -26,10 +26,10 @@ logger = Logger.get_logger("EVALUATION")
 
 
 class Evaluator:
-    def __init__(self, valid_dataset, model, args) -> None:
-        self.args = args
+    def __init__(self, valid_dataset, model) -> None:
+        self.args = cli()
         self.model = model
-        self.model.to(args.device)
+        self.model.to(self.args.device)
         self.valid_dataset = valid_dataset
         self.loss_func = DiffBinarizationLoss()
         self.valid_loader = DataLoader(self.valid_dataset,
@@ -40,7 +40,7 @@ class Evaluator:
         self.acc = AccuracyMetric()
         self.post_process = PostProcessor()
 
-    def eval(self):
+    def eval(self) -> dict:
         metrics = {
             "shrink_maps_loss": BatchMeter(),
             "thresh_maps_loss": BatchMeter(),
@@ -57,30 +57,28 @@ class Evaluator:
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
                 preds = self.model(images)
-                loss = self.loss_func(preds, labels)
-                metrics['shrink_maps_loss'].update(loss["loss_shrink_maps"])
-                metrics['thresh_maps_loss'].update(loss["loss_thresh_maps"])
-                metrics['binary_maps_loss'].update(loss["loss_binary_maps"])
-                metrics['total_loss'].update(loss["total_loss"])
-
                 boxes, scores = self.post_process(images, preds, True)
-                classes = torch.ones_like(scores, dtype=scores.dtype)
-                gt_score = torch.ones_like(scores, dtype=scores.dtype)
-                self.acc.compute_acc(boxes, scores, classes, images, gt_score, classes)
+                for box, score, image in zip(boxes, scores, labels):
+                    mask = image[0].cpu().detach().numpy().astype(np.int32)
+                    mask = np.expand_dims(mask, axis=0)
+                    if len(box) == 0 or len(score) == 0:
+                        box = np.zeros_like(mask, dtype=mask.dtype)
+                        score = np.array([1.0], dtype=np.float32)
+                    else:
+                        box = np.array(box, dtype=mask.dtype)
+                        score = np.array(score, dtype=np.float32)
+
+                    classes = np.zeros_like(score, dtype=np.int32)
+                    self.acc.compute_acc(box, score, classes, mask, classes)
 
         acc = self.acc.map_mt.compute()
         metrics['map'].update(acc['map'])
         metrics['map_50'].update(acc['map_50'])
         metrics['map_75'].update(acc['map_75'])
 
-        logger.info(f'shrink_maps_loss: {metrics["shrink_maps_loss"].get_value("mean"): .3f},
-                    thresh_maps_loss: {metrics["thresh_maps_loss"].get_value("mean"): .3f},
-                    binary_maps_loss: {metrics["binary_maps_loss"].get_value("mean"): .3f},
-                    total_loss: {metrics["total_loss"].get_value("mean"): .3f}')
-
-        logger.info(f'mAP: {metrics["map"].get_value("mean"): .3f},
-                    mAP_50: {metrics["map_50"].get_value("mean"): .3f},
-                    mAP_75: {metrics["map_75"].get_value("mean"): .3f}')
+        logger.info(f'mAP: {metrics["map"].get_value("mean"): .3f} - mAP_50: {metrics["map_50"].get_value("mean"): .3f} - mAP_75: {metrics["map_75"].get_value("mean"): .3f}')
+        
+        return metrics
 
 
 def cli():
@@ -102,5 +100,5 @@ if __name__ == "__main__":
     valid_dataset = ICDAR2015Dataset(mode="Eval")
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
-    evaluate = Evaluator(valid_dataset, model, args)
+    evaluate = Evaluator(valid_dataset, model)
     evaluate.eval()

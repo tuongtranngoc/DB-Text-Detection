@@ -26,7 +26,7 @@ class PostProcessor():
         boxes_batch = []
         scores_batch = []
         for batch_idx in range(pred.size(0)):
-            __, __, H, W = inputs
+            __, __, H, W = inputs.shape
             if is_output_polygon:
                 boxes, scores = self.bitmap2polygon(pred[batch_idx], segmentation[batch_idx], W, H)
             else:
@@ -41,7 +41,7 @@ class PostProcessor():
         return pred > self.thresh
     
     def bitmap2polygon(self, pred, _bitmap, imgw, imgh):
-        assert len(bitmap.shape) == 2
+        assert len(_bitmap.shape) == 2
         bitmap = _bitmap.cpu().numpy()
         pred = pred.cpu().detach().numpy()
         h, w = bitmap.shape
@@ -57,7 +57,7 @@ class PostProcessor():
             points = approx.reshape((-1, 2))
             if points.shape[0] < 4: continue
 
-            score = self.box_score_fast(pred, contour.sequeeze(1))
+            score = self.box_score_fast(pred, contour.squeeze(1))
             if score < self.box_thresh: continue
 
             if points.shape[0] > 2:
@@ -114,15 +114,16 @@ class PostProcessor():
             box[:, 1] = np.clip(np.round(box[:, 1] / height * imgh), 0, imgh)
             boxes[index, :, :] = box.astype(np.int16)
             scores[index] = score
+            
         return boxes, scores
 
     def box_score_fast(self, bitmap, _box):
         h, w = bitmap.shape[:2]
         box = _box.copy()
-        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int), 0, w-1)
-        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int), 0, w - 1)
-        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int), 0, h - 1)
-        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int), 0, h - 1)
+        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int32), 0, w-1)
+        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int32), 0, w - 1)
+        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int32), 0, h - 1)
+        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int32), 0, h - 1)
 
         mask = np.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype=np.uint8)
         box[:, 0] = box[:, 0] - xmin
@@ -141,7 +142,7 @@ class PostProcessor():
     def get_mini_boxes(self, contour):
         bounding_box = cv2.minAreaRect(contour)
         points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
-        
+
         index_1, index_2, index_3, index_4 = 0, 1, 2, 3
         if points[1][1] > points[0][1]:
             index_1 = 0
