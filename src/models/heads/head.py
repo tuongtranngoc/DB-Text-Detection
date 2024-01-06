@@ -11,6 +11,7 @@ from . import *
 class HeadDB(nn.Module):
     def __init__(self, in_channels, out_channels=None, k = 50):
         super().__init__()
+        self.training = True
         self.k = k
         self.binarize = nn.Sequential(
             nn.Conv2d(in_channels, in_channels // 4, 3, padding=1),
@@ -85,5 +86,5 @@ if __name__ == "__main__":
     neck = NeckDB(backbone.out_channels)
     y = neck(y)
     head = HeadDB(neck.out_channels)
-    y = head(y)
     import ipdb; ipdb.set_trace()
+    y = head(y)

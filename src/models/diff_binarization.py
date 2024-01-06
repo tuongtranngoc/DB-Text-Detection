@@ -12,7 +12,7 @@ from . import *
 
 class DiffBinarization(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(DiffBinarization, self).__init__()
         self.backbone = BackboneDB()
         self.neck = NeckDB(self.backbone.out_channels)
         self.head = HeadDB(self.neck.out_channels)
@@ -29,5 +29,5 @@ class DiffBinarization(nn.Module):
 if __name__ == "__main__":
     DB = DiffBinarization()
     x = torch.randn(2, 3, 640, 640)
-    y = DB(x)
     import ipdb; ipdb.set_trace()
+    y = DB(x)

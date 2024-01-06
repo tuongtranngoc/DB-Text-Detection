@@ -11,10 +11,11 @@ import torch.nn as nn
 
 from . import *
 
+
 class Visualization:
     C, H, W = cfg['Train']['dataset']['transforms']['image_shape']
     device = cfg['Global']['device']
-
+    
     @classmethod
     def draw_polygon(cls, image, polygon, color=(255, 0, 0)):
         # polygon: x1, y1, x2, y2, x3, y3, x4, y4

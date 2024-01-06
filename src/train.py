@@ -54,21 +54,21 @@ class Trainer:
                 self.start_epoch = self.resume_training(ckpt)
                 logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best acc: {self.best_acc}")
     
+    
     def train(self):
+        self.model.train()
         for epoch in range(self.start_epoch, self.args.epochs):
             for i, (images, labels) in enumerate(self.train_loader):
-                self.model.train()
                 bz = images.size(0)
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
                 out = self.model(images)
                 loss = self.loss_func(out, labels)
-                total_loss = loss['total_loss']
                 self.optimizer.zero_grad()
-                total_loss.backward()
+                loss['total_loss'].backward()
                 self.optimizer.step()
 
-                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - loss: {total_loss}", end='\r')
+                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - loss: {loss['total_loss'].item()}", end='\r')
 
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)

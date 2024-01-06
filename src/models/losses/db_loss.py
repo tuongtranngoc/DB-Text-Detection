@@ -11,7 +11,7 @@ from . import *
 
 class DiffBinarizationLoss(nn.Module):
     def __init__(self, alpha=1.0, beta=10, hn_ratio=3, eps=1e-6):
-        super().__init__()
+        super(DiffBinarizationLoss, self).__init__()
         self.hn_ratio = hn_ratio
         self.alpha = alpha
         self.beta = beta
@@ -24,16 +24,16 @@ class DiffBinarizationLoss(nn.Module):
         pred_thresh_maps = pred[:, 1, ...]
         pred_binary_maps = pred[:, 2, ...]
         gt_shrink_maps, gt_shrink_masks, gt_thresh_maps, gt_thresh_masks = gt
-
         loss_shrink_maps = self.probability_map_loss(pred_shrink_maps, gt_shrink_maps, gt_shrink_masks)
         loss_thresh_maps = self.threshold_map_loss(pred_thresh_maps, gt_thresh_maps, gt_thresh_masks)
+
         metrics = dict(
             loss_shrink_maps=loss_shrink_maps,
             loss_thresh_maps=loss_thresh_maps
         )
+
         if pred.size()[1] > 2:
             loss_binary_maps = self.binary_map_loss(pred_binary_maps, gt_shrink_maps, gt_shrink_masks)
-            metrics['loss_binary_maps'] = loss_binary_maps
             total_loss = self.alpha * loss_shrink_maps + self.beta * loss_thresh_maps + loss_binary_maps
             metrics['total_loss'] = total_loss
         else:

@@ -31,7 +31,7 @@ class Logger:
     def get_logger(cls, logger_name):
         logger = logging.getLogger(logger_name)
         logger.setLevel(logging.INFO)
-
+        
         if not logger.hasHandlers():
             logger.addHandler(cls.get_console_handler())
             logger.addHandler(cls.get_file_handler())
