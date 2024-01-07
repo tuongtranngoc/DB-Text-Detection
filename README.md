@@ -18,8 +18,7 @@ pip install -r requirements.txt
 ```
 
 ## Data preparation
-
-Please download [ICDAR2015](https://rrc.cvc.uab.es/?ch=4&com=downloads) dataset and setup the folder structure:
+Please download the [ICDAR2015](https://rrc.cvc.uab.es/?ch=4&com=downloads) dataset and set up the folder structure:
 
 ```bash
 dataset/icdar2015
