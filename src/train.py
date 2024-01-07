@@ -123,17 +123,17 @@ class Trainer:
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lr", default=cfg['Optimizer']['lr'], type=float)
-    parser.add_argument("--device", default=cfg['Global']['device'], type=str)
+    parser.add_argument("--lr", type=float, default=cfg['Optimizer']['lr'])
+    parser.add_argument("--device", type=str, default=cfg['Global']['device'])
     parser.add_argument("--resume", default=cfg['Global']['resume_training'])
-    parser.add_argument("--epochs", default=cfg['Train']['loader']['epochs'], type=int)
-    parser.add_argument("--shuffle", default=cfg['Train']['loader']['shuffle'], type=bool)
-    parser.add_argument("--eval_step", default=cfg['Train']['loader']['eval_step'], type=int)
-    parser.add_argument("--batch_size", default=cfg['Train']['loader']['batch_size'], type=int)
-    parser.add_argument("--num_workers", default=cfg['Train']['loader']['num_workers'], type=int)
-    parser.add_argument("--pin_memory", default=cfg['Train']['loader']['use_shared_memory'], type=bool)
-    parser.add_argument("--last_ckpt_pth", default=cfg['Train']['checkpoint']['last_path'], type=str)
-    parser.add_argument("--best_ckpt_pth", default=cfg['Train']['checkpoint']['best_path'], type=str)
+    parser.add_argument("--epochs", type=int, default=cfg['Train']['loader']['epochs'])
+    parser.add_argument("--shuffle", type=bool, default=cfg['Train']['loader']['shuffle'])
+    parser.add_argument("--eval_step", type=int, default=cfg['Train']['loader']['eval_step'])
+    parser.add_argument("--batch_size", type=int, default=cfg['Train']['loader']['batch_size'])
+    parser.add_argument("--num_workers", type=int, default=cfg['Train']['loader']['num_workers'])
+    parser.add_argument("--pin_memory", type=bool, default=cfg['Train']['loader']['use_shared_memory'])
+    parser.add_argument("--last_ckpt_pth", type=str, default=cfg['Train']['checkpoint']['last_path'])
+    parser.add_argument("--best_ckpt_pth", type=str, default=cfg['Train']['checkpoint']['best_path'])
     
     args = parser.parse_args()
     return args

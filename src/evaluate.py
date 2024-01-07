@@ -59,7 +59,6 @@ class Evaluator:
                 pred_boxes, __ = self.post_process(images, preds)
                 gt_boxes, __ = self.post_process(images, labels)
 
-                print(pred_boxes)
                 for pred_box, gt_box in zip(pred_boxes, gt_boxes):
                     accuracy.append(self.acc.compute_acc(pred_box, gt_box))
 
