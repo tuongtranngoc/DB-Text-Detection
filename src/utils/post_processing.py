@@ -34,7 +34,7 @@ class DBPostProcess():
                 boxes, scores = self.bitmap2polygon(pred[batch_idx], segmentation[batch_idx], W, H)
             else:
                 boxes, scores = self.bitmap2boxes(pred[batch_idx], segmentation[batch_idx], W, H)
-
+            
             boxes_batch.append(boxes)
             scores_batch.append(scores)
         
@@ -65,7 +65,10 @@ class DBPostProcess():
             if score < self.box_thresh: continue
 
             if points.shape[0] > 2:
-                box = self.unclip(points, unclip_ratio=self.unclip_ratio)
+                try:
+                    box = self.unclip(points, unclip_ratio=self.unclip_ratio)
+                except:
+                    continue
                 if len(box) > 1: continue
             else:
                 continue
