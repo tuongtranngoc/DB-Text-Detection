@@ -11,7 +11,6 @@ from . import *
 class HeadDB(nn.Module):
     def __init__(self, in_channels, out_channels=None, k = 50):
         super().__init__()
-        self.training = True
         self.k = k
         self.binarize = nn.Sequential(
             nn.Conv2d(in_channels, in_channels // 4, 3, padding=1),
@@ -30,11 +29,9 @@ class HeadDB(nn.Module):
     def forward(self, x):
         shrink_maps = self.binarize(x)
         threshold_maps = self.thresh(x)
-        if self.training:
-            binary_maps = self.step_function(shrink_maps, threshold_maps)
-            y = torch.cat((shrink_maps, threshold_maps, binary_maps), dim=1)
-        else:
-            y = torch.cat((shrink_maps, threshold_maps), dim=1)
+        binary_maps = self.step_function(shrink_maps, threshold_maps)
+        y = torch.cat((shrink_maps, threshold_maps, binary_maps), dim=1)
+
         return y
 
     def weights_init(self, m):

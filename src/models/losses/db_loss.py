@@ -20,22 +20,23 @@ class DiffBinarizationLoss(nn.Module):
         self.threshold_map_loss = L1Loss(eps=eps)
     
     def forward(self, pred: torch.Tensor, gt: torch.Tensor):
-        pred_shrink_maps = pred[:, 0, ...]
-        pred_thresh_maps = pred[:, 1, ...]
-        pred_binary_maps = pred[:, 2, ...]
+        pred_shrink_maps = pred[:, 0, :, :]
+        pred_thresh_maps = pred[:, 1, :, :]
+        pred_binary_maps = pred[:, 2, :, :]
         gt_shrink_maps, gt_shrink_masks, gt_thresh_maps, gt_thresh_masks = gt
-        loss_shrink_maps = self.probability_map_loss(pred_shrink_maps, gt_shrink_maps, gt_shrink_masks)
-        loss_thresh_maps = self.threshold_map_loss(pred_thresh_maps, gt_thresh_maps, gt_thresh_masks)
+        shrink_maps_loss = self.probability_map_loss(pred_shrink_maps, gt_shrink_maps, gt_shrink_masks)
+        thresh_maps_loss = self.threshold_map_loss(pred_thresh_maps, gt_thresh_maps, gt_thresh_masks)
 
         metrics = dict(
-            loss_shrink_maps=loss_shrink_maps,
-            loss_thresh_maps=loss_thresh_maps
+            shrink_maps_loss=shrink_maps_loss,
+            thresh_maps_loss=thresh_maps_loss
         )
 
         if pred.size()[1] > 2:
-            loss_binary_maps = self.binary_map_loss(pred_binary_maps, gt_shrink_maps, gt_shrink_masks)
-            total_loss = self.alpha * loss_shrink_maps + self.beta * loss_thresh_maps + loss_binary_maps
+            binary_maps_loss = self.binary_map_loss(pred_binary_maps, gt_shrink_maps, gt_shrink_masks)
+            total_loss = self.alpha * shrink_maps_loss + self.beta * thresh_maps_loss + binary_maps_loss
+            metrics['binary_maps_loss'] = binary_maps_loss
             metrics['total_loss'] = total_loss
         else:
-            metrics['total_loss'] = loss_shrink_maps
+            metrics['total_loss'] = shrink_maps_loss
         return metrics

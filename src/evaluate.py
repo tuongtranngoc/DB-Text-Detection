@@ -7,29 +7,29 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from . import config as cfg
 
-import os
 import argparse
+import numpy as np
 from tqdm import tqdm
 
+from . import config as cfg
 from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.dataset import ICDAR2015Dataset
-from src.utils.post_processing import PostProcessor
-from src.utils.metrics import BatchMeter, AccuracyMetric
+from src.utils.post_processing import DBPostProcess
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
+from src.utils.metrics import BatchMeter, AccTorchMetric, PolygonEvaluator
 
 
 logger = Logger.get_logger("EVALUATION")
 
 
 class Evaluator:
-    def __init__(self, valid_dataset, model, args) -> None:
-        self.args = args
+    def __init__(self, valid_dataset, model) -> None:
+        self.args = cli()
         self.model = model
-        self.model.to(args.device)
+        self.model.to(self.args.device)
         self.valid_dataset = valid_dataset
         self.loss_func = DiffBinarizationLoss()
         self.valid_loader = DataLoader(self.valid_dataset,
@@ -37,50 +37,39 @@ class Evaluator:
                                        shuffle=self.args.shuffle,
                                        num_workers=self.args.num_workers,
                                        pin_memory=self.args.pin_memory)
-        self.acc = AccuracyMetric()
-        self.post_process = PostProcessor()
+        self.acc = PolygonEvaluator()
+        self.post_process = DBPostProcess()
 
-    def eval(self):
+    def eval(self) -> dict:
         metrics = {
-            "shrink_maps_loss": BatchMeter(),
-            "thresh_maps_loss": BatchMeter(),
-            "binary_maps_loss": BatchMeter(),
-            "total_loss": BatchMeter(),
-            "map": BatchMeter(),
-            "map_50": BatchMeter(),
-            "map_75": BatchMeter()
+            "precision": BatchMeter(),
+            "recall": BatchMeter(),
+            "hmean": BatchMeter()
         }
         self.model.eval()
-
+        accuracy = []
         for i, (images, labels) in enumerate(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
                 preds = self.model(images)
-                loss = self.loss_func(preds, labels)
-                metrics['shrink_maps_loss'].update(loss["loss_shrink_maps"])
-                metrics['thresh_maps_loss'].update(loss["loss_thresh_maps"])
-                metrics['binary_maps_loss'].update(loss["loss_binary_maps"])
-                metrics['total_loss'].update(loss["total_loss"])
+                preds = preds.cpu().detach().numpy()
+                images = images.cpu().detach().numpy()
+                labels = [label.cpu().detach().numpy() for label in labels]
+                pred_boxes, __ = self.post_process(images, preds)
+                gt_boxes, __ = self.post_process(images, labels)
 
-                boxes, scores = self.post_process(images, preds, True)
-                classes = torch.ones_like(scores, dtype=scores.dtype)
-                gt_score = torch.ones_like(scores, dtype=scores.dtype)
-                self.acc.compute_acc(boxes, scores, classes, images, gt_score, classes)
+                for pred_box, gt_box in zip(pred_boxes, gt_boxes):
+                    accuracy.append(self.acc.compute_acc(pred_box, gt_box))
 
-        acc = self.acc.map_mt.compute()
-        metrics['map'].update(acc['map'])
-        metrics['map_50'].update(acc['map_50'])
-        metrics['map_75'].update(acc['map_75'])
+        avg_acc = self.acc.combine_results(accuracy)
+        metrics['precision'].update(avg_acc['precision'])
+        metrics['recall'].update(avg_acc['recall'])
+        metrics['hmean'].update(avg_acc['hmean'])
 
-        logger.info(f'shrink_maps_loss: {metrics["shrink_maps_loss"].get_value("mean"): .3f},
-                    thresh_maps_loss: {metrics["thresh_maps_loss"].get_value("mean"): .3f},
-                    binary_maps_loss: {metrics["binary_maps_loss"].get_value("mean"): .3f},
-                    total_loss: {metrics["total_loss"].get_value("mean"): .3f}')
-
-        logger.info(f'mAP: {metrics["map"].get_value("mean"): .3f},
-                    mAP_50: {metrics["map_50"].get_value("mean"): .3f},
-                    mAP_75: {metrics["map_75"].get_value("mean"): .3f}')
+        logger.info(f'precision: {metrics["precision"].get_value("mean"): .3f} - recall: {metrics["recall"].get_value("mean"): .3f} - hmean: {metrics["hmean"].get_value("mean"): .3f}')
+        
+        return metrics
 
 
 def cli():
@@ -102,5 +91,5 @@ if __name__ == "__main__":
     valid_dataset = ICDAR2015Dataset(mode="Eval")
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
-    evaluate = Evaluator(valid_dataset, model, args)
+    evaluate = Evaluator(valid_dataset, model)
     evaluate.eval()

@@ -99,7 +99,7 @@ $=> F = C_2+C_3+C_4+C_5$
 |$+$ | Concatenate |
 
 ## 3. Head Network
-Before having the final result with a polygon/bounding box of text, we need to process two important predictions: **probability map** and **threshold map** to get an **approximate**** binary map****.
+Before having the final result with a polygon/bounding box of text, we need to process two important predictions: **probability map** and **threshold map** to get an **approximate binary map**.
 
 **probability map** is a binary feature map, the predicted area of text is `1` value, otherwise is `0` value. From the $F$ feature in the Neck network, we use a binary module to map $F \to P$:
 

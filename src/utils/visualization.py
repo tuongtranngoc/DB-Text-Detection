@@ -46,3 +46,7 @@ class Visualization:
                    save_graph=True,
                    directory=cfg['Debug']['model'],
                    graph_name='resnet18')
+        
+    @classmethod
+    def output_debug(cls, dataset, idxs, model, save_debug):
+        pass

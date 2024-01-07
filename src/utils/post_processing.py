@@ -12,7 +12,7 @@ import numpy as np
 from shapely.geometry import Polygon
 
 
-class PostProcessor():
+class DBPostProcess():
     def __init__(self, thresh=0.3, box_thresh=0.7, max_candidates=1000, unclip_ratio=1.5):
         self.min_size = 3
         self.thresh = thresh
@@ -20,13 +20,16 @@ class PostProcessor():
         self.max_candidates = max_candidates
         self.unclip_ratio = unclip_ratio
 
-    def __call__(self, inputs, preds, is_output_polygon):
-        pred = preds[:, 0, :, :]
+    def __call__(self, inputs, preds, is_output_polygon=True):
+        if isinstance(preds, torch.Tensor) or isinstance(preds, np.ndarray):
+            pred = preds[:, 0, :, :]
+        else:
+            pred = preds[0]
         segmentation = self.binarize(pred)
         boxes_batch = []
         scores_batch = []
-        for batch_idx in range(pred.size(0)):
-            __, __, H, W = inputs
+        __, __, H, W = inputs.shape
+        for batch_idx in range(pred.shape[0]):
             if is_output_polygon:
                 boxes, scores = self.bitmap2polygon(pred[batch_idx], segmentation[batch_idx], W, H)
             else:
@@ -41,9 +44,8 @@ class PostProcessor():
         return pred > self.thresh
     
     def bitmap2polygon(self, pred, _bitmap, imgw, imgh):
-        assert len(bitmap.shape) == 2
-        bitmap = _bitmap.cpu().numpy()
-        pred = pred.cpu().detach().numpy()
+        assert len(_bitmap.shape) == 2
+        bitmap = _bitmap.copy()
         h, w = bitmap.shape
         boxes = []
         scores = []
@@ -55,28 +57,30 @@ class PostProcessor():
             eps = 0.005 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, eps, True)
             points = approx.reshape((-1, 2))
+
             if points.shape[0] < 4: continue
 
-            score = self.box_score_fast(pred, contour.sequeeze(1))
+            score = self.box_score_fast(pred, contour.squeeze(1))
+
             if score < self.box_thresh: continue
 
             if points.shape[0] > 2:
                 box = self.unclip(points, unclip_ratio=self.unclip_ratio)
-                if len(box) > 0: continue
+                if len(box) > 1: continue
             else:
                 continue
         
             box = box.reshape(-1, 2)
-            __, sside = self.get_mini_boxes(box.reshape((-1, 1, 2)))
+            box, sside = self.get_mini_boxes(box.reshape((-1, 1, 2)))
             if sside < self.min_size + 2: continue
-
+            box = np.array(box)
             if not isinstance(imgw, int):
                 imgw = imgw.item()
                 imgh = imgh.item()
 
             box[:, 0] = np.clip(np.round(box[:, 0] / w * imgw), 0, imgw)
             box[:, 1] = np.clip(np.round(box[:, 1] / h * imgh), 0, imgh)
-            boxes.append(box)
+            boxes.append(box.astype(np.int32))
             scores.append(score)
         
         return boxes, scores
@@ -114,15 +118,16 @@ class PostProcessor():
             box[:, 1] = np.clip(np.round(box[:, 1] / height * imgh), 0, imgh)
             boxes[index, :, :] = box.astype(np.int16)
             scores[index] = score
+            
         return boxes, scores
 
     def box_score_fast(self, bitmap, _box):
         h, w = bitmap.shape[:2]
         box = _box.copy()
-        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int), 0, w-1)
-        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int), 0, w - 1)
-        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int), 0, h - 1)
-        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int), 0, h - 1)
+        xmin = np.clip(np.floor(box[:, 0].min()).astype(np.int32), 0, w-1)
+        xmax = np.clip(np.ceil(box[:, 0].max()).astype(np.int32), 0, w - 1)
+        ymin = np.clip(np.floor(box[:, 1].min()).astype(np.int32), 0, h - 1)
+        ymax = np.clip(np.ceil(box[:, 1].max()).astype(np.int32), 0, h - 1)
 
         mask = np.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype=np.uint8)
         box[:, 0] = box[:, 0] - xmin
@@ -141,7 +146,7 @@ class PostProcessor():
     def get_mini_boxes(self, contour):
         bounding_box = cv2.minAreaRect(contour)
         points = sorted(list(cv2.boxPoints(bounding_box)), key=lambda x: x[0])
-        
+
         index_1, index_2, index_3, index_4 = 0, 1, 2, 3
         if points[1][1] > points[0][1]:
             index_1 = 0
