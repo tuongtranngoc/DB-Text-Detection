@@ -12,7 +12,7 @@ import numpy as np
 from shapely.geometry import Polygon
 
 
-class PostProcessor():
+class DBPostProcess():
     def __init__(self, thresh=0.3, box_thresh=0.7, max_candidates=1000, unclip_ratio=1.5):
         self.min_size = 3
         self.thresh = thresh
@@ -25,8 +25,8 @@ class PostProcessor():
         segmentation = self.binarize(pred)
         boxes_batch = []
         scores_batch = []
-        for batch_idx in range(pred.size(0)):
-            __, __, H, W = inputs.shape
+        __, __, H, W = inputs.shape
+        for batch_idx in range(pred.shape[0]):
             if is_output_polygon:
                 boxes, scores = self.bitmap2polygon(pred[batch_idx], segmentation[batch_idx], W, H)
             else:
@@ -42,8 +42,7 @@ class PostProcessor():
     
     def bitmap2polygon(self, pred, _bitmap, imgw, imgh):
         assert len(_bitmap.shape) == 2
-        bitmap = _bitmap.cpu().numpy()
-        pred = pred.cpu().detach().numpy()
+        bitmap = _bitmap.copy()
         h, w = bitmap.shape
         boxes = []
         scores = []

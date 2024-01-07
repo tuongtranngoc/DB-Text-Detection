@@ -37,8 +37,7 @@ class ShrinkGenerator(object):
                                 pyclipper.ET_CLOSEDPOLYGON)
                 shrinked = []
                 # Increase the shrink ratio every time we get multiple polygon returned back
-                possible_ratios = np.arange(self.shrink_ratio, 1,
-                                            self.shrink_ratio)
+                possible_ratios = np.arange(self.shrink_ratio, 1, self.shrink_ratio)
                 np.append(possible_ratios, 1)
                 for ratio in possible_ratios:
                     distance = polygon_shape.area * (1 - np.power(ratio, 2)) / polygon_shape.length
@@ -47,6 +46,7 @@ class ShrinkGenerator(object):
                         break
                 
                 if shrinked == []:
+                    import ipdb; ipdb.set_trace()
                     cv2.fillPoly(mask, polygon.astype(np.int32)[np.newaxis, :, :], 0)
                     continue
 
@@ -76,7 +76,7 @@ class BorderGenerator(object):
     def __call__(self, image, polygons):
         canvas = np.zeros(image.shape[:2], dtype=np.float32)
         mask = np.zeros(image.shape[:2], dtype=np.float32)
-
+        
         for i in range(len(polygons)):
             self.draw_border_map(polygons[i], canvas, mask=mask)
         canvas = canvas * (self.thresh_max - self.thresh_min) + self.thresh_min

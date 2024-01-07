@@ -7,16 +7,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from . import config as cfg
 
 import argparse
 import numpy as np
 from tqdm import tqdm
 
+from . import config as cfg
 from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.dataset import ICDAR2015Dataset
-from src.utils.post_processing import PostProcessor
+from src.utils.post_processing import DBPostProcess
 from src.utils.metrics import BatchMeter, AccuracyMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
@@ -38,7 +38,7 @@ class Evaluator:
                                        num_workers=self.args.num_workers,
                                        pin_memory=self.args.pin_memory)
         self.acc = AccuracyMetric()
-        self.post_process = PostProcessor()
+        self.post_process = DBPostProcess()
 
     def eval(self) -> dict:
         metrics = {
@@ -57,10 +57,13 @@ class Evaluator:
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
                 preds = self.model(images)
-                boxes, scores = self.post_process(images, preds, True)
-                for box, score, image in zip(boxes, scores, labels):
-                    mask = image[0].cpu().detach().numpy().astype(np.int32)
-                    mask = np.expand_dims(mask, axis=0)
+                preds = preds.cpu().detach().numpy()
+                images = images.cpu().detach().numpy()
+                boxes, scores = self.post_process(images, preds)
+                
+                for box, score, label in zip(boxes, scores, labels):
+                    mask = label[0].cpu().detach().numpy()
+                    mask = mask.astype(np.int32)[np.newaxis, :, :]
                     if len(box) == 0 or len(score) == 0:
                         box = np.zeros_like(mask, dtype=mask.dtype)
                         score = np.array([1.0], dtype=np.float32)
