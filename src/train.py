@@ -30,8 +30,8 @@ class Trainer:
         self.args = args
         self.start_epoch = 1
         self.best_acc = 0.0
-        self.create_model()
         self.create_data_loader()
+        self.create_model()
         self.eval = Evaluator(self.valid_dataset, self.model)
     
     def create_data_loader(self):
@@ -46,7 +46,8 @@ class Trainer:
     def create_model(self):
         self.model = DiffBinarization().to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr, amsgrad=True)
+        #self.lr_scheduler = WarmupPolyLR(self.optimizer, power=0.9, max_iters=self.args.epochs*len(self.train_loader), warmup_iters=cfg['Optimizer']['warmup_epoch'])
 
         if self.args.resume:
             logger.info("Resuming training ...")
@@ -125,7 +126,7 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lr", type=float, default=cfg['Optimizer']['lr'])
     parser.add_argument("--device", type=str, default=cfg['Global']['device'])
-    parser.add_argument("--resume", default=cfg['Global']['resume_training'])
+    parser.add_argument("--resume", type=bool, default=cfg['Global']['resume_training'])
     parser.add_argument("--epochs", type=int, default=cfg['Train']['loader']['epochs'])
     parser.add_argument("--shuffle", type=bool, default=cfg['Train']['loader']['shuffle'])
     parser.add_argument("--eval_step", type=int, default=cfg['Train']['loader']['eval_step'])
