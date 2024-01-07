@@ -47,7 +47,7 @@ class Evaluator:
             "hmean": BatchMeter()
         }
         self.model.eval()
-        acc = []
+        accuracy = []
         for i, (images, labels) in enumerate(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
@@ -59,13 +59,14 @@ class Evaluator:
                 pred_boxes, __ = self.post_process(images, preds)
                 gt_boxes, __ = self.post_process(images, labels)
 
+                print(pred_boxes)
                 for pred_box, gt_box in zip(pred_boxes, gt_boxes):
-                    self.acc.compute_acc(pred_box, gt_box)
-        
-        acc = self.acc.combine_results(acc)
-        metrics['precision'].update(acc['precision'])
-        metrics['recall'].update(acc['recall'])
-        metrics['hmean'].update(acc['hmean'])
+                    accuracy.append(self.acc.compute_acc(pred_box, gt_box))
+
+        avg_acc = self.acc.combine_results(accuracy)
+        metrics['precision'].update(avg_acc['precision'])
+        metrics['recall'].update(avg_acc['recall'])
+        metrics['hmean'].update(avg_acc['hmean'])
 
         logger.info(f'precision: {metrics["precision"].get_value("mean"): .3f} - recall: {metrics["recall"].get_value("mean"): .3f} - hmean: {metrics["hmean"].get_value("mean"): .3f}')
         
