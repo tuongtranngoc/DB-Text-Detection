@@ -90,9 +90,8 @@ class Trainer:
             if epoch % self.args.eval_step == 0:
                 accuracy = self.eval.eval()
                 current_acc = accuracy['hmean'].get_value('mean')
-                Tensorboard.add_scalars('eval_loss', epoch, loss=current_acc)
-                Tensorboard.add_scalars('eval_acc', epoch, loss=accuracy['map_50'].get_value('mean'))
-
+                Tensorboard.add_scalars('eval_acc', epoch, loss=current_acc)
+                
                 if current_acc > self.best_acc:
                     self.best_acc = current_acc
                     best_ckpt_path = self.args.best_ckpt_pth
