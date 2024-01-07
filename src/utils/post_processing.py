@@ -21,7 +21,10 @@ class DBPostProcess():
         self.unclip_ratio = unclip_ratio
 
     def __call__(self, inputs, preds, is_output_polygon=True):
-        pred = preds[:, 0, :, :]
+        if isinstance(preds, torch.Tensor) or isinstance(preds, np.ndarray):
+            pred = preds[:, 0, :, :]
+        else:
+            pred = preds[0]
         segmentation = self.binarize(pred)
         boxes_batch = []
         scores_batch = []
@@ -68,16 +71,16 @@ class DBPostProcess():
                 continue
         
             box = box.reshape(-1, 2)
-            __, sside = self.get_mini_boxes(box.reshape((-1, 1, 2)))
+            box, sside = self.get_mini_boxes(box.reshape((-1, 1, 2)))
             if sside < self.min_size + 2: continue
-
+            box = np.array(box)
             if not isinstance(imgw, int):
                 imgw = imgw.item()
                 imgh = imgh.item()
-            print(box, score)
+
             box[:, 0] = np.clip(np.round(box[:, 0] / w * imgw), 0, imgw)
             box[:, 1] = np.clip(np.round(box[:, 1] / h * imgh), 0, imgh)
-            boxes.append(box)
+            boxes.append(box.astype(np.int32))
             scores.append(score)
         
         return boxes, scores

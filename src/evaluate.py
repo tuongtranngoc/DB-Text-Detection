@@ -17,9 +17,9 @@ from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.dataset import ICDAR2015Dataset
 from src.utils.post_processing import DBPostProcess
-from src.utils.metrics import BatchMeter, AccuracyMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
+from src.utils.metrics import BatchMeter, AccTorchMetric, PolygonEvaluator
 
 
 logger = Logger.get_logger("EVALUATION")
@@ -37,21 +37,17 @@ class Evaluator:
                                        shuffle=self.args.shuffle,
                                        num_workers=self.args.num_workers,
                                        pin_memory=self.args.pin_memory)
-        self.acc = AccuracyMetric()
+        self.acc = PolygonEvaluator()
         self.post_process = DBPostProcess()
 
     def eval(self) -> dict:
         metrics = {
-            "shrink_maps_loss": BatchMeter(),
-            "thresh_maps_loss": BatchMeter(),
-            "binary_maps_loss": BatchMeter(),
-            "total_loss": BatchMeter(),
-            "map": BatchMeter(),
-            "map_50": BatchMeter(),
-            "map_75": BatchMeter()
+            "precision": BatchMeter(),
+            "recall": BatchMeter(),
+            "hmean": BatchMeter()
         }
         self.model.eval()
-
+        acc = []
         for i, (images, labels) in enumerate(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
@@ -59,27 +55,19 @@ class Evaluator:
                 preds = self.model(images)
                 preds = preds.cpu().detach().numpy()
                 images = images.cpu().detach().numpy()
-                boxes, scores = self.post_process(images, preds)
-                
-                for box, score, label in zip(boxes, scores, labels):
-                    mask = label[0].cpu().detach().numpy()
-                    mask = mask.astype(np.int32)[np.newaxis, :, :]
-                    if len(box) == 0 or len(score) == 0:
-                        box = np.zeros_like(mask, dtype=mask.dtype)
-                        score = np.array([1.0], dtype=np.float32)
-                    else:
-                        box = np.array(box, dtype=mask.dtype)
-                        score = np.array(score, dtype=np.float32)
+                labels = [label.cpu().detach().numpy() for label in labels]
+                pred_boxes, __ = self.post_process(images, preds)
+                gt_boxes, __ = self.post_process(images, labels)
 
-                    classes = np.zeros_like(score, dtype=np.int32)
-                    self.acc.compute_acc(box, score, classes, mask, classes)
+                for pred_box, gt_box in zip(pred_boxes, gt_boxes):
+                    self.acc.compute_acc(pred_box, gt_box)
+        
+        acc = self.acc.combine_results(acc)
+        metrics['precision'].update(acc['precision'])
+        metrics['recall'].update(acc['recall'])
+        metrics['hmean'].update(acc['hmean'])
 
-        acc = self.acc.map_mt.compute()
-        metrics['map'].update(acc['map'])
-        metrics['map_50'].update(acc['map_50'])
-        metrics['map_75'].update(acc['map_75'])
-
-        logger.info(f'mAP: {metrics["map"].get_value("mean"): .3f} - mAP_50: {metrics["map_50"].get_value("mean"): .3f} - mAP_75: {metrics["map_75"].get_value("mean"): .3f}')
+        logger.info(f'precision: {metrics["precision"].get_value("mean"): .3f} - recall: {metrics["recall"].get_value("mean"): .3f} - hmean: {metrics["hmean"].get_value("mean"): .3f}')
         
         return metrics
 
