@@ -10,7 +10,7 @@ dataset = ICDAR2015Dataset('Eval')
 
 
 for i in tqdm(range(10)):
-    image, label = dataset[i]
+    image, label, __ = dataset[i]
     image = DataUtils.image_to_numpy(image)
     image = Visualization.draw_polygon(image, label)
     Visualization.save_debug(image, cfg['Debug']['dataset'], f'{i}.png')

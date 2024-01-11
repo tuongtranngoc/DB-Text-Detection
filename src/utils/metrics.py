@@ -40,19 +40,20 @@ class BatchMeter(object):
 
 class AccTorchMetric(object):
     def __init__(self):
-        self.map_mt = MeanAveragePrecision(iou_type='segm')
+        self.map_mt = MeanAveragePrecision(iou_type='bbox', box_format='xyxy')
     
-    def compute_acc(self, pred_mask, pred_score, pred_class, gt_mask, gt_class):
+    def compute_acc(self, pred_mask, pred_score, pred_class, gt_mask, gt_score, gt_class):
         """Mean Average Precision (mAP)
         Reference: https://torchmetrics.readthedocs.io/en/stable/detection/mean_average_precision.html
         """
         preds = [{
-            "masks": torch.tensor(pred_mask, dtype=torch.bool),
+            "boxes": torch.tensor(pred_mask, dtype=torch.float32),
             "scores": torch.tensor(pred_score, dtype=torch.float32),
             "labels": torch.tensor(pred_class, dtype=torch.long)
         }]
         target = [{
-            "masks": torch.tensor(gt_mask, dtype=torch.bool),
+            "boxes": torch.tensor(gt_mask, dtype=torch.float32),
+            "scores": torch.tensor(gt_score, dtype=torch.float32),
             "labels": torch.tensor(gt_class, dtype=torch.long)
         }]
         self.map_mt.update(preds, target)
