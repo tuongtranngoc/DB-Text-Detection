@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-
+import cv2
 import argparse
 import numpy as np
 from tqdm import tqdm
@@ -37,17 +37,16 @@ class Evaluator:
                                        shuffle=self.args.shuffle,
                                        num_workers=self.args.num_workers,
                                        pin_memory=self.args.pin_memory)
-        self.acc = PolygonEvaluator()
+        self.acc = AccTorchMetric()
         self.post_process = DBPostProcess()
 
     def eval(self) -> dict:
         metrics = {
-            "precision": BatchMeter(),
-            "recall": BatchMeter(),
-            "hmean": BatchMeter()
+            "map": BatchMeter(),
+            "map_50": BatchMeter(),
+            "map_75": BatchMeter()
         }
         self.model.eval()
-        accuracy = []
         for i, (images, labels) in enumerate(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
@@ -56,18 +55,20 @@ class Evaluator:
                 preds = preds.cpu().detach().numpy()
                 images = images.cpu().detach().numpy()
                 labels = [label.cpu().detach().numpy() for label in labels]
-                pred_boxes, __ = self.post_process(images, preds)
-                gt_boxes, __ = self.post_process(images, labels)
+                pred_boxes, pred_scores = self.post_process(images, preds, False)
+                gt_boxes, gt_scores = self.post_process(images, labels, False)
+                for pred_box, pred_score, gt_box, gt_score in \
+                    zip(pred_boxes, pred_scores, gt_boxes, gt_scores):
+                    pred_class = np.zeros_like(pred_score, dtype=pred_score.dtype)
+                    gt_class = np.zeros_like(gt_score, dtype=gt_score.dtype)
+                    self.acc.compute_acc(pred_box, pred_score, pred_class, gt_box, gt_score, gt_class)
 
-                for pred_box, gt_box in zip(pred_boxes, gt_boxes):
-                    accuracy.append(self.acc.compute_acc(pred_box, gt_box))
+        avg_acc = self.acc.map_mt.compute()
+        metrics['map'].update(avg_acc['map'])
+        metrics['map_50'].update(avg_acc['map_50'])
+        metrics['map_75'].update(avg_acc['map_75'])
 
-        avg_acc = self.acc.combine_results(accuracy)
-        metrics['precision'].update(avg_acc['precision'])
-        metrics['recall'].update(avg_acc['recall'])
-        metrics['hmean'].update(avg_acc['hmean'])
-
-        logger.info(f'precision: {metrics["precision"].get_value("mean"): .3f} - recall: {metrics["recall"].get_value("mean"): .3f} - hmean: {metrics["hmean"].get_value("mean"): .3f}')
+        logger.info(f'map: {metrics["map"].get_value("mean"): .3f} - map_50: {metrics["map_50"].get_value("mean"): .3f} - map_75: {metrics["map_75"].get_value("mean"): .3f}')
         
         return metrics
 

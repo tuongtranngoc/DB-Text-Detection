@@ -13,14 +13,14 @@ from shapely.geometry import Polygon
 
 
 class DBPostProcess():
-    def __init__(self, thresh=0.3, box_thresh=0.7, max_candidates=1000, unclip_ratio=1.5):
+    def __init__(self, thresh=0.3, box_thresh=0.7, max_candidates=100, unclip_ratio=1.5):
         self.min_size = 3
         self.thresh = thresh
         self.box_thresh = box_thresh
         self.max_candidates = max_candidates
         self.unclip_ratio = unclip_ratio
 
-    def __call__(self, inputs, preds, is_output_polygon=True):
+    def __call__(self, inputs, preds, is_output_polygon=False):
         if isinstance(preds, torch.Tensor) or isinstance(preds, np.ndarray):
             pred = preds[:, 0, :, :]
         else:
@@ -90,12 +90,11 @@ class DBPostProcess():
 
     def bitmap2boxes(self, pred, _bitmap, imgw, imgh):
         assert len(_bitmap.shape) == 2
-        bitmap = _bitmap.cpu().numpy()  # The first channel
-        pred = pred.cpu().detach().numpy()
+        bitmap = _bitmap.copy()  # The first channel
         height, width = bitmap.shape
         contours, _ = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         num_contours = min(len(contours), self.max_candidates)
-        boxes = np.zeros((num_contours, 4, 2), dtype=np.int16)
+        boxes = np.zeros((num_contours, 4), dtype=np.int16)
         scores = np.zeros((num_contours,), dtype=np.float32)
 
         for index in range(num_contours):
@@ -119,7 +118,7 @@ class DBPostProcess():
 
             box[:, 0] = np.clip(np.round(box[:, 0] / width * imgw), 0, imgw)
             box[:, 1] = np.clip(np.round(box[:, 1] / height * imgh), 0, imgh)
-            boxes[index, :, :] = box.astype(np.int16)
+            boxes[index, :] = self.poly2xyxy(box.astype(np.int16))
             scores[index] = score
             
         return boxes, scores
@@ -145,6 +144,13 @@ class DBPostProcess():
         offset.AddPath(box, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
         expanded = np.array(offset.Execute(distance))
         return expanded
+
+    def poly2xyxy(self, poly:np.ndarray):
+        x1 = poly[:, 0].min()
+        y1 = poly[:, 1].min()
+        x2 = poly[:, 0].max()
+        y2 = poly[:, 1].max()
+        return np.array([x1, y1, x2, y2], dtype=np.int16)
     
     def get_mini_boxes(self, contour):
         bounding_box = cv2.minAreaRect(contour)
