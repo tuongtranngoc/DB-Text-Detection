@@ -30,6 +30,7 @@ dataset/icdar2015
 |____|______img_1.jpg
 |____|______img_2.jpg
 |train
+|____|gt
 |____|______gt_img_1.txt
 |____|______gt_img_2.txt
 |____|images
