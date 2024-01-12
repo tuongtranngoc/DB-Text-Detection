@@ -49,6 +49,7 @@ class Predictor:
             Exception("Not exist image path")
 
     def predict(self, img_path):
+        save_dir = args.save_dir
         img = self.preprocess(img_path).to(self.args.device)
         with torch.no_grad():
             preds = self.model(img)
@@ -60,14 +61,12 @@ class Predictor:
         img = img.squeeze(0)
         img = self.draw_output(img, boxes)
         basename = os.path.basename(img_path)
-        save_dir = 'outputs'
         os.makedirs(save_dir, exist_ok=True)
         cv2.imwrite(f"{save_dir}/{basename}", img)
         
     def draw_output(self, img, result, color=(0, 0, 255), thickness=2):
         img = DataUtils.image_to_numpy(img)
         img = img.copy()
-
         for box in result:
             box = box.astype(np.int32)
             img = cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, thickness)
@@ -79,6 +78,7 @@ def cli():
     parser.add_argument("--image_path", type=str, default=None, help="Path to image file")
     parser.add_argument("--model_path", type=str, default=cfg['Train']['checkpoint']['best_path'], help="Path to model checkpoint")
     parser.add_argument("--device", type=str, default='cuda', help="device inference (cuda or cpu)")
+    parser.add_argument("--save_dir", type=str, default=cfg['Debug']['prediction'])
     
     args = parser.parse_args()
     return args

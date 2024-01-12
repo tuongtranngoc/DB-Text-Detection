@@ -54,3 +54,4 @@ Debug:
   dataset: 'debugs/dataset'
   label_generation: 'debugs/label_generation'
   validate_polygons: 'debugs/validate_polygons'
+  prediction: 'outputs'

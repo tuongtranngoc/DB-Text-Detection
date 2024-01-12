@@ -46,7 +46,6 @@ class ShrinkGenerator(object):
                         break
                 
                 if shrinked == []:
-                    import ipdb; ipdb.set_trace()
                     cv2.fillPoly(mask, polygon.astype(np.int32)[np.newaxis, :, :], 0)
                     continue
 

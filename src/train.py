@@ -46,9 +46,9 @@ class Trainer:
     def create_model(self):
         self.model = DiffBinarization().to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
-        self.lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[150, 200, 400], gamma=0.1)
-
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
+        # self.lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[150, 200, 400], gamma=0.1)
+        
         if self.args.resume:
             logger.info("Resuming training ...")
             last_ckpt = self.args.last_ckpt_pth
@@ -85,7 +85,7 @@ class Trainer:
                 print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - total_loss: {metrics['total_loss'].get_value(): .4f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value(): .4f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value(): .4f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value(): .4f}", end='\r')
                 
                 Tensorboard.add_scalars("train_loss", epoch, total_loss=metrics['total_loss'].get_value("mean"))
-            self.lr_scheduler.step()
+            # self.lr_scheduler.step()
             logger.info(f"Epoch {epoch} - total_loss: {metrics['total_loss'].get_value('mean'): .3f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value('mean'): .3f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value('mean'): .3f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value('mean'): .3f}")
             
             if epoch % self.args.eval_step == 0:
