@@ -13,7 +13,7 @@ from shapely.geometry import Polygon
 
 
 class DBPostProcess():
-    def __init__(self, thresh=0.3, box_thresh=0.7, max_candidates=100, unclip_ratio=1.5):
+    def __init__(self, thresh=0.3, box_thresh=0.5, max_candidates=100, unclip_ratio=1.5):
         self.min_size = 3
         self.thresh = thresh
         self.box_thresh = box_thresh
@@ -120,7 +120,7 @@ class DBPostProcess():
             box[:, 1] = np.clip(np.round(box[:, 1] / height * imgh), 0, imgh)
             boxes[index, :] = self.poly2xyxy(box.astype(np.int16))
             scores[index] = score
-            
+
         return boxes, scores
 
     def box_score_fast(self, bitmap, _box):

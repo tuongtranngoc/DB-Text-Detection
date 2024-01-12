@@ -24,9 +24,10 @@ class ICDAR2015Dataset(Dataset):
         self.transform = TransformDB()
         self.dataset = self.load_dataset()
 
-    def process_dataset(self, image, labels):
-        image = DataUtils.image_to_numpy(image.clone())
-        labels = labels.copy()
+    def process_dataset(self, _image, _labels):
+        image = _image.clone()
+        image = DataUtils.image_to_numpy(image)
+        labels = _labels.copy()
         ___, shrink_map, shrink_mask = ShrinkGenerator()(image, labels)
         ___, border_map, border_mask = BorderGenerator()(image, labels)
         return shrink_map, shrink_mask, border_map, border_mask

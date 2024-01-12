@@ -17,9 +17,9 @@ from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.dataset import ICDAR2015Dataset
 from src.utils.post_processing import DBPostProcess
+from src.utils.metrics import BatchMeter, AccTorchMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
-from src.utils.metrics import BatchMeter, AccTorchMetric, PolygonEvaluator
 
 
 logger = Logger.get_logger("EVALUATION")
@@ -40,14 +40,14 @@ class Evaluator:
         self.acc = AccTorchMetric()
         self.post_process = DBPostProcess()
 
-    def eval(self) -> dict:
+    def evaluate(self) -> dict:
         metrics = {
             "map": BatchMeter(),
             "map_50": BatchMeter(),
             "map_75": BatchMeter()
         }
         self.model.eval()
-        for i, (images, labels) in enumerate(self.valid_loader):
+        for (images, labels) in tqdm(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)
@@ -64,6 +64,7 @@ class Evaluator:
                     self.acc.compute_acc(pred_box, pred_score, pred_class, gt_box, gt_score, gt_class)
 
         avg_acc = self.acc.map_mt.compute()
+        self.acc.map_mt.reset()
         metrics['map'].update(avg_acc['map'])
         metrics['map_50'].update(avg_acc['map_50'])
         metrics['map_75'].update(avg_acc['map_75'])
@@ -93,4 +94,4 @@ if __name__ == "__main__":
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
     evaluate = Evaluator(valid_dataset, model)
-    evaluate.eval()
+    evaluate.evaluate()
