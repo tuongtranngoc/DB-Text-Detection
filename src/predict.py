@@ -64,7 +64,7 @@ class Predictor:
         os.makedirs(save_dir, exist_ok=True)
         cv2.imwrite(f"{save_dir}/{basename}", img)
         
-    def draw_output(self, img, result, color=(255, 0, 0), thickness=1):
+    def draw_output(self, img, result, color=(0, 0, 255), thickness=2):
         img = DataUtils.image_to_numpy(img)
         img = img.copy()
 

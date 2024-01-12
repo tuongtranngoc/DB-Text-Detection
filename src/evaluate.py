@@ -17,9 +17,9 @@ from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.dataset import ICDAR2015Dataset
 from src.utils.post_processing import DBPostProcess
+from src.utils.metrics import BatchMeter, AccTorchMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
-from src.utils.metrics import BatchMeter, AccTorchMetric
 
 
 logger = Logger.get_logger("EVALUATION")
