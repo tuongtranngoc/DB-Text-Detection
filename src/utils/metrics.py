@@ -40,7 +40,7 @@ class BatchMeter(object):
 
 class AccTorchMetric(object):
     def __init__(self):
-        self.map_mt = MeanAveragePrecision(iou_type='bbox', box_format='xyxy')
+        self.map_mt = MeanAveragePrecision(iou_type='bbox', box_format='xyxy', class_metrics=True)
     
     def compute_acc(self, pred_mask, pred_score, pred_class, gt_mask, gt_score, gt_class):
         """Mean Average Precision (mAP)

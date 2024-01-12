@@ -13,7 +13,7 @@ Train:
     ignore_tags: ['*', '###']
     transforms:
       image_shape: [3, 640, 640]
-      augmentation: True
+      augmentation: False
       mean: [0.485, 0.456, 0.406]
       std: [0.229, 0.224, 0.225]
 

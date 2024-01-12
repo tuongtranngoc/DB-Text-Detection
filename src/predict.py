@@ -41,7 +41,7 @@ class Predictor:
     
     def preprocess(self, img_path):
         if os.path.exists(img_path):
-            img = cv2.imread(img_path)
+            img = cv2.imread(img_path)[..., ::-1]
             img = self.transform(image=img)['image']
             img = img.unsqueeze(0)
             return img
@@ -52,31 +52,25 @@ class Predictor:
         img = self.preprocess(img_path).to(self.args.device)
         with torch.no_grad():
             preds = self.model(img)
-            img = img.cpu().detach().numpy()
+            _img = img.cpu().detach().numpy()
             preds = preds.cpu().detach().numpy()
-            boxes, scores = self.post_process(img, preds)
+            boxes, scores = self.post_process(_img, preds, False)
             boxes, scores = boxes[0], scores[0]
-            if len(boxes) > 0:
-                idxs = [x.sum() > 0 for x in boxes]
-                boxes = [boxes[i] for i, v in enumerate(idxs) if v]
-                scores = [scores[i] for i, v in enumerate(idxs) if v]
-            else:
-                boxes = []
-                scores = []
         
-        img = img[0]
+        img = img.squeeze(0)
         img = self.draw_output(img, boxes)
         basename = os.path.basename(img_path)
         save_dir = 'outputs'
         os.makedirs(save_dir, exist_ok=True)
         cv2.imwrite(f"{save_dir}/{basename}", img)
         
-    def draw_output(self, img, result, color=(255, 0, 0), thickness=2):
+    def draw_output(self, img, result, color=(255, 0, 0), thickness=1):
         img = DataUtils.image_to_numpy(img)
         img = img.copy()
-        for point in result:
-            point = point.astype(int)
-            cv2.polylines(img, [point], True, color, thickness)
+
+        for box in result:
+            box = box.astype(np.int32)
+            img = cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, thickness)
         return img
 
 

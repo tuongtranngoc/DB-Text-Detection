@@ -3,3 +3,4 @@ dataset/*
 debugs/*
 logs/*
 weights/
+outputs/

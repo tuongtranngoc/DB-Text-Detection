@@ -40,7 +40,7 @@ class Evaluator:
         self.acc = AccTorchMetric()
         self.post_process = DBPostProcess()
 
-    def eval(self) -> dict:
+    def evaluate(self) -> dict:
         metrics = {
             "map": BatchMeter(),
             "map_50": BatchMeter(),
@@ -64,6 +64,7 @@ class Evaluator:
                     self.acc.compute_acc(pred_box, pred_score, pred_class, gt_box, gt_score, gt_class)
 
         avg_acc = self.acc.map_mt.compute()
+        self.acc.map_mt.reset()
         metrics['map'].update(avg_acc['map'])
         metrics['map_50'].update(avg_acc['map_50'])
         metrics['map_75'].update(avg_acc['map_75'])
@@ -93,4 +94,4 @@ if __name__ == "__main__":
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
     evaluate = Evaluator(valid_dataset, model)
-    evaluate.eval()
+    evaluate.evaluate()

@@ -48,7 +48,7 @@ class Trainer:
         self.loss_func = DiffBinarizationLoss()
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr, amsgrad=True)
         #self.lr_scheduler = WarmupPolyLR(self.optimizer, power=0.9, max_iters=self.args.epochs*len(self.train_loader), warmup_iters=cfg['Optimizer']['warmup_epoch'])
-
+        
         if self.args.resume:
             logger.info("Resuming training ...")
             last_ckpt = self.args.last_ckpt_pth
@@ -89,7 +89,7 @@ class Trainer:
             logger.info(f"Epoch {epoch} - total_loss: {metrics['total_loss'].get_value('mean'): .3f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value('mean'): .3f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value('mean'): .3f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value('mean'): .3f}")
             
             if epoch % self.args.eval_step == 0:
-                accuracy = self.eval.eval()
+                accuracy = self.eval.evaluate()
                 current_acc = accuracy['map'].get_value('mean')
                 Tensorboard.add_scalars('eval_acc', epoch, loss=current_acc)
                 
