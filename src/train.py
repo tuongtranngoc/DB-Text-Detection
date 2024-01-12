@@ -46,8 +46,7 @@ class Trainer:
     def create_model(self):
         self.model = DiffBinarization().to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
-        # self.lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[150, 200, 400], gamma=0.1)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
         
         if self.args.resume:
             logger.info("Resuming training ...")
@@ -56,7 +55,6 @@ class Trainer:
                 ckpt = torch.load(last_ckpt, map_location=self.args.device)
                 self.start_epoch = self.resume_training(ckpt)
                 logger.info(f"Loading checkpoint with start epoch: {self.start_epoch}, best acc: {self.best_acc}")
-    
     
     def train(self):
         metrics = {
