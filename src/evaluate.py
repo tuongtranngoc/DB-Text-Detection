@@ -19,7 +19,7 @@ from src.data.dataset import ICDAR2015Dataset
 from src.utils.post_processing import DBPostProcess
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
-from src.utils.metrics import BatchMeter, AccTorchMetric, PolygonEvaluator
+from src.utils.metrics import BatchMeter, AccTorchMetric
 
 
 logger = Logger.get_logger("EVALUATION")
@@ -47,7 +47,7 @@ class Evaluator:
             "map_75": BatchMeter()
         }
         self.model.eval()
-        for i, (images, labels) in enumerate(self.valid_loader):
+        for (images, labels) in tqdm(self.valid_loader):
             with torch.no_grad():
                 images = DataUtils.to_device(images)
                 labels = DataUtils.to_device(labels)

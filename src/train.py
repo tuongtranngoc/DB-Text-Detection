@@ -46,9 +46,9 @@ class Trainer:
     def create_model(self):
         self.model = DiffBinarization().to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr, amsgrad=True)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
         #self.lr_scheduler = WarmupPolyLR(self.optimizer, power=0.9, max_iters=self.args.epochs*len(self.train_loader), warmup_iters=cfg['Optimizer']['warmup_epoch'])
-        
+
         if self.args.resume:
             logger.info("Resuming training ...")
             last_ckpt = self.args.last_ckpt_pth
