@@ -17,6 +17,7 @@ dataset = ICDAR2015Dataset('Eval')
 label_generate = LabelGenerator()
 shrink_ratio = 0.4
 
+
 for i in tqdm(range(20,30), desc="Debug for shrink map..."):
     image, labels = dataset[i]
     image = DataUtils.image_to_numpy(image)
@@ -34,5 +35,3 @@ for i in tqdm(range(20,30), desc="Debug for shrink map..."):
         points = cv2.boxPoints(bbox)
         image = Visualization.draw_polygon(image, points, color=(0, 255, 0))
     Visualization.save_debug(image, cfg['Debug']['label_generation'], f'shrink_map_{i}.png')
-
-    # import ipdb; ipdb.set_trace()

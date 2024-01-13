@@ -46,10 +46,9 @@ class ShrinkGenerator(object):
                         break
                 
                 if shrinked == []:
-                    import ipdb; ipdb.set_trace()
                     cv2.fillPoly(mask, polygon.astype(np.int32)[np.newaxis, :, :], 0)
                     continue
-
+                
                 for each_shirnk in shrinked:
                     shirnk = np.array(each_shirnk).reshape(-1, 2)
                     cv2.fillPoly(shrink, [shirnk.astype(np.int32)], 1)
@@ -144,12 +143,3 @@ class BorderGenerator(object):
         result = np.sqrt(square_distance_1 * square_distance_2 * square_sin / square_distance)
         result[cosin < 0] = np.sqrt(np.fmin(square_distance_1, square_distance_2))[cosin < 0]
         return result
-
-    def extend_line(self, point_1, point_2, result):
-        ex_point_1 = (int(round(point_1[0] + (point_1[0] - point_2[0]) * (1 + self.shrink_ratio))),
-                      int(round(point_1[1] + (point_1[1] - point_2[1]) * (1 + self.shrink_ratio))))
-        cv2.line(result, tuple(ex_point_1), tuple(point_1), 4096.0, 1, lineType=cv2.LINE_AA, shift=0)
-        ex_point_2 = (int(round(point_2[0] + (point_2[0] - point_1[0]) * (1 + self.shrink_ratio))),
-                      int(round(point_2[1] + (point_2[1] - point_1[1]) * (1 + self.shrink_ratio))))
-        cv2.line(result, tuple(ex_point_2), tuple(point_2), 4096.0, 1, lineType=cv2.LINE_AA, shift=0)
-        return ex_point_1, ex_point_2
