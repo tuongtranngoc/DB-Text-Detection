@@ -57,3 +57,9 @@ python -m src.predict
 ```
 
 ## Experiments
+
+|Export format|image size|mAP|mAP_50|mAP_75| Time |
+|--|--|--|--|--|--|
+|Pytorch|640x640| - | - | - | - |
+|TorchScript| - | - | - | - |
+
