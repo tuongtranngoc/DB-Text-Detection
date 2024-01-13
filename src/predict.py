@@ -34,15 +34,12 @@ class Predictor:
         self.model.eval()
         self.post_process = DBPostProcess()
         self.image_size = cfg['Train']['dataset']['transforms']['image_shape']
-        self.transform = A.Compose([
-            A.Resize(self.image_size[1], self.image_size[2]),
-            A.Normalize(always_apply=True),
-            ToTensorV2()])
+        self.transform = TransformDB()
     
     def preprocess(self, img_path):
         if os.path.exists(img_path):
             img = cv2.imread(img_path)[..., ::-1]
-            img = self.transform(image=img)['image']
+            img = self.transform(image=img, label=None)['image']
             img = img.unsqueeze(0)
             return img
         else:

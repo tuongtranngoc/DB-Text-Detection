@@ -64,12 +64,12 @@ class Evaluator:
                     self.acc.compute_acc(pred_box, pred_score, pred_class, gt_box, gt_score, gt_class)
 
         avg_acc = self.acc.map_mt.compute()
-        self.acc.map_mt.reset()
         metrics['map'].update(avg_acc['map'])
         metrics['map_50'].update(avg_acc['map_50'])
         metrics['map_75'].update(avg_acc['map_75'])
 
         logger.info(f'map: {metrics["map"].get_value("mean"): .3f} - map_50: {metrics["map_50"].get_value("mean"): .3f} - map_75: {metrics["map_75"].get_value("mean"): .3f}')
+        self.acc.map_mt.reset()
         
         return metrics
 

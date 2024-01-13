@@ -13,7 +13,7 @@ from . import *
 class DiffBinarization(nn.Module):
     def __init__(self):
         super(DiffBinarization, self).__init__()
-        self.backbone = BackboneDB()
+        self.backbone = deformable_resnet18(pretrained=True, in_channels=3)
         self.neck = NeckDB(self.backbone.out_channels)
         self.head = HeadDB(self.neck.out_channels)
         
