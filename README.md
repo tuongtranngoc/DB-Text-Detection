@@ -53,13 +53,12 @@ python -m src.evaluate
 ## Prediction
 
 ```bash
-python -m src.predict
+python -m src.predict --image_path <path_to_image>
 ```
 
 ## Experiments
 
 |Export format|image size|mAP|mAP_50|mAP_75| Time |
 |--|--|--|--|--|--|
-|Pytorch|640x640| - | - | - | - |
+|Pytorch|640x640| 261 | 540 | 225 | - |
 |TorchScript| 640x640 | - | - | - | - |
-

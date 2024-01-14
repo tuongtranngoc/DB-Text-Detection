@@ -75,10 +75,10 @@ class Predictor:
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image_path", type=str, default=None, help="Path to image file")
-    parser.add_argument("--model_path", type=str, default=cfg['Train']['checkpoint']['best_path'], help="Path to model checkpoint")
-    parser.add_argument("--device", type=str, default='cuda', help="device inference (cuda or cpu)")
     parser.add_argument("--save_dir", type=str, default=cfg['Debug']['prediction'])
+    parser.add_argument("--image_path", type=str, default=None, help="Path to image file")
+    parser.add_argument("--device", type=str, default='cuda', help="device inference (cuda or cpu)")
+    parser.add_argument("--model_path", type=str, default=cfg['Train']['checkpoint']['best_path'], help="Path to model checkpoint")
     
     args = parser.parse_args()
     return args

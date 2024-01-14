@@ -39,7 +39,7 @@ class Evaluator:
                                        pin_memory=self.args.pin_memory)
         self.acc = AccTorchMetric()
         self.post_process = DBPostProcess()
-
+    
     def evaluate(self) -> dict:
         metrics = {
             "map": BatchMeter(),
