@@ -13,7 +13,7 @@ from shapely.geometry import Polygon
 
 
 class DBPostProcess():
-    def __init__(self, thresh=0.3, box_thresh=0.5, max_candidates=100, unclip_ratio=1.5):
+    def __init__(self, thresh=0.3, box_thresh=0.1, max_candidates=100, unclip_ratio=1.5):
         self.min_size = 3
         self.thresh = thresh
         self.box_thresh = box_thresh

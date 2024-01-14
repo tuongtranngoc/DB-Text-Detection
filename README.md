@@ -60,5 +60,5 @@ python -m src.predict --image_path <path_to_image>
 
 |Export format|image size|mAP|mAP_50|mAP_75| Time |
 |--|--|--|--|--|--|
-|Pytorch|640x640| 261 | 540 | 225 | - |
+|Pytorch|640x640| 26.9 | 54.3 | 23.4 | - |
 |TorchScript| 640x640 | - | - | - | - |
