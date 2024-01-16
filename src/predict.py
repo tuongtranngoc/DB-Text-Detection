@@ -10,6 +10,8 @@ import os
 import cv2
 import glob
 import argparse
+
+import time
 import numpy as np
 
 from . import config as cfg
@@ -28,11 +30,11 @@ logger = Logger.get_logger("PREDICTION")
 class Predictor:
     def __init__(self, args) -> None:
         self.args = args
-        self.model = DiffBinarization()
+        self.model = DiffBinarization(pretrained=False)
         self.model.load_state_dict(torch.load(self.args.model_path, map_location=self.args.device)['model'])
         self.model.to(self.args.device)
         self.model.eval()
-        self.post_process = DBPostProcess()
+        self.post_process = DBPostProcess(box_thresh=0.5)
         self.image_size = cfg['Train']['dataset']['transforms']['image_shape']
         self.transform = A.Compose([
             A.Resize(self.image_size[1], self.image_size[2]),
@@ -52,7 +54,9 @@ class Predictor:
         save_dir = args.save_dir
         img = self.preprocess(img_path).to(self.args.device)
         with torch.no_grad():
+            st = time.time()
             preds = self.model(img)
+            print(time.time()-st)
             _img = img.cpu().detach().numpy()
             preds = preds.cpu().detach().numpy()
             boxes, scores = self.post_process(_img, preds, False)
@@ -87,5 +91,6 @@ def cli():
 if __name__ == "__main__":
     args = cli()
     predictor = Predictor(args)
-    predictor.predict(args.image_path)
+    for _ in  range(10):
+        predictor.predict(args.image_path)
     
