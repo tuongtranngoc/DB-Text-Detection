@@ -46,7 +46,7 @@ class Trainer:
     def create_model(self):
         self.model = DiffBinarization().to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.args.lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
         
         if self.args.resume:
             logger.info("Resuming training ...")
@@ -89,7 +89,7 @@ class Trainer:
             if epoch % self.args.eval_step == 0:
                 accuracy = self.eval.evaluate()
                 current_acc = accuracy['map'].get_value('mean')
-                Tensorboard.add_scalars('eval_acc', epoch, loss=current_acc)
+                Tensorboard.add_scalars('eval_acc', epoch, acc=current_acc)
                 
                 if current_acc > self.best_acc:
                     self.best_acc = current_acc
@@ -99,7 +99,7 @@ class Trainer:
             # Save last checkpoint
             last_ckpt_path = self.args.last_ckpt_pth
             self.save_ckpt(last_ckpt_path, self.best_acc, epoch)
-
+    
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         ckpt_dict = {

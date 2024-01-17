@@ -53,13 +53,22 @@ python -m src.evaluate
 ## Prediction
 
 ```bash
-python -m src.predict
+python -m src.predict --image_path <path_to_image>
 ```
+
+Example:
+
+```bash
+python -m src.predict --image_path images/example.jpg
+```
+
+<p align="center">
+    <img src="images/example.jpg">
+</p>
 
 ## Experiments
 
-|Export format|image size|mAP|mAP_50|mAP_75| Time |
+|Export format|image size|mAP|mAP_50|mAP_75| Inference time (RTX3060)|
 |--|--|--|--|--|--|
-|Pytorch|640x640| - | - | - | - |
+|Pytorch|640x640| 26.9 | 54.3 | 23.4 | 0.002s |
 |TorchScript| 640x640 | - | - | - | - |
-

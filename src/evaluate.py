@@ -39,7 +39,7 @@ class Evaluator:
                                        pin_memory=self.args.pin_memory)
         self.acc = AccTorchMetric()
         self.post_process = DBPostProcess()
-
+    
     def evaluate(self) -> dict:
         metrics = {
             "map": BatchMeter(),
@@ -57,12 +57,11 @@ class Evaluator:
                 labels = [label.cpu().detach().numpy() for label in labels]
                 pred_boxes, pred_scores = self.post_process(images, preds, False)
                 gt_boxes, gt_scores = self.post_process(images, labels, False)
-                for pred_box, pred_score, gt_box, gt_score in \
-                    zip(pred_boxes, pred_scores, gt_boxes, gt_scores):
+                for pred_box, pred_score, gt_box, gt_score in zip(pred_boxes, pred_scores, gt_boxes, gt_scores):
                     pred_class = np.zeros_like(pred_score, dtype=pred_score.dtype)
                     gt_class = np.zeros_like(gt_score, dtype=gt_score.dtype)
                     self.acc.compute_acc(pred_box, pred_score, pred_class, gt_box, gt_score, gt_class)
-
+        
         avg_acc = self.acc.map_mt.compute()
         metrics['map'].update(avg_acc['map'])
         metrics['map_50'].update(avg_acc['map_50'])

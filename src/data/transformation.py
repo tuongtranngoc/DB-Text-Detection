@@ -31,8 +31,8 @@ class TransformDB(object):
             A.RandomBrightnessContrast(p=0.3),
             A.MedianBlur(p=0.1, blur_limit=5),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3),
-            A.RandomCrop(height=320, width=320)
-            ],
+            A.RandomCrop(height=640, width=640, p=0.3)
+            ], p=0.55,
         keypoint_params=A.KeypointParams(format='xy', remove_invisible=False))
     
     def transform(self, image, label):
