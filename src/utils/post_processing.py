@@ -144,7 +144,7 @@ class DBPostProcess():
         offset.AddPath(box, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
         expanded = np.array(offset.Execute(distance))
         return expanded
-
+    
     def poly2xyxy(self, poly:np.ndarray):
         x1 = poly[:, 0].min()
         y1 = poly[:, 1].min()
