@@ -12,7 +12,7 @@ class BackboneDB(nn.Module):
     def __init__(self) -> None:
         super(BackboneDB, self).__init__()
         backbone = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
-
+        
         self.conv1 = backbone.conv1
         self.bn1 = backbone.bn1
         self.relu = backbone.relu
