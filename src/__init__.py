@@ -7,7 +7,7 @@ import glob
 import os
 
 
-CFG_PATH = 'src/configs/det_icdar2015.yml'
+CFG_PATH = 'src/configs/det_total_text.yml'
 
 
 def load_config(file_path=CFG_PATH):

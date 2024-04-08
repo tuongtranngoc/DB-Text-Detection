@@ -14,10 +14,10 @@ from . import config as cfg
 from .evaluate import Evaluator
 
 from src.utils.logger import Logger
-from src.utils.metrics import BatchMeter
+from src.utils.metrics import AverageMeter
 from src.utils.data_utils import DataUtils
-from src.data.dataset import ICDAR2015Dataset
 from src.utils.tensorboard import Tensorboard
+from src.data.total_text import TotalTextDataset
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
 
@@ -35,8 +35,8 @@ class Trainer:
         self.eval = Evaluator(self.valid_dataset, self.model)
     
     def create_data_loader(self):
-        self.train_dataset = ICDAR2015Dataset(mode="Train")
-        self.valid_dataset = ICDAR2015Dataset(mode="Eval")
+        self.train_dataset = TotalTextDataset(mode="Train")
+        self.valid_dataset = TotalTextDataset(mode="Eval")
         self.train_loader = DataLoader(self.train_dataset, 
                                        batch_size=self.args.batch_size, 
                                        shuffle=self.args.shuffle,
@@ -58,10 +58,10 @@ class Trainer:
     
     def train(self):
         metrics = {
-            'shrink_maps_loss': BatchMeter(),
-            'thresh_maps_loss': BatchMeter(),
-            'binary_maps_loss':  BatchMeter(),
-            'total_loss': BatchMeter()
+            'shrink_maps_loss': AverageMeter(),
+            'thresh_maps_loss': AverageMeter(),
+            'binary_maps_loss':  AverageMeter(),
+            'total_loss': AverageMeter()
         }
         self.model.train()
         for epoch in range(self.start_epoch, self.args.epochs):
@@ -80,15 +80,15 @@ class Trainer:
                 metrics['binary_maps_loss'].update(loss['binary_maps_loss'])
                 metrics['total_loss'].update(loss['total_loss'])
                 
-                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - total_loss: {metrics['total_loss'].get_value(): .4f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value(): .4f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value(): .4f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value(): .4f}", end='\r')
+                print(f"Epoch {epoch} - batch {i+1}/{len(self.train_loader)} - total_loss: {metrics['total_loss'].val: .4f} - shrink_maps_loss: {metrics['shrink_maps_loss'].val: .4f} - thresh_maps_loss: {metrics['thresh_maps_loss'].val: .4f} - binary_maps_loss: {metrics['binary_maps_loss'].val: .4f}", end='\r')
                 
-                Tensorboard.add_scalars("train_loss", epoch, total_loss=metrics['total_loss'].get_value("mean"))
+                Tensorboard.add_scalars("train_loss", epoch, total_loss=metrics['total_loss'].avg)
             # self.lr_scheduler.step()
-            logger.info(f"Epoch {epoch} - total_loss: {metrics['total_loss'].get_value('mean'): .3f} - shrink_maps_loss: {metrics['shrink_maps_loss'].get_value('mean'): .3f} - thresh_maps_loss: {metrics['thresh_maps_loss'].get_value('mean'): .3f} - binary_maps_loss: {metrics['binary_maps_loss'].get_value('mean'): .3f}")
+            logger.info(f"Epoch {epoch} - total_loss: {metrics['total_loss'].avg: .3f} - shrink_maps_loss: {metrics['shrink_maps_loss'].avg: .3f} - thresh_maps_loss: {metrics['thresh_maps_loss'].avg: .3f} - binary_maps_loss: {metrics['binary_maps_loss'].avg: .3f}")
             
             if epoch % self.args.eval_step == 0:
                 accuracy = self.eval.evaluate()
-                current_acc = accuracy['map'].get_value('mean')
+                current_acc = accuracy['map'].val
                 Tensorboard.add_scalars('eval_acc', epoch, acc=current_acc)
                 
                 if current_acc > self.best_acc:
