@@ -14,9 +14,9 @@ from . import config as cfg
 from .evaluate import Evaluator
 
 from src.utils.logger import Logger
-from src.utils.map_metrics import AverageMeter
 from src.utils.data_utils import DataUtils
 from src.utils.tensorboard import Tensorboard
+from src.utils.map_metrics import AverageMeter
 from src.data.total_text import TotalTextDataset
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
