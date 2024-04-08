@@ -58,7 +58,7 @@ class ShrinkGenerator(object):
         for polygon in polygons:
             polygon[:, 0] = np.clip(polygon[:, 0], 0, w-1)
             polygon[:, 1] = np.clip(polygon[:, 1], 0, h-1)
-
+            
         for i in range(len(polygons)):
             area = cv2.contourArea(polygons[i])
             if area > 0:

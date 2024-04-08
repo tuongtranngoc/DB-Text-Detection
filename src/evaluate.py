@@ -15,9 +15,9 @@ from tqdm import tqdm
 from . import config as cfg
 from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
-from src.data.dataset import ICDAR2015Dataset
+from src.data.total_text import TotalTextDataset
 from src.utils.post_processing import DBPostProcess
-from src.utils.metrics import BatchMeter, AccTorchMetric
+from src.utils.map_metrics import AverageMeter, AccTorchMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
 
@@ -42,9 +42,9 @@ class Evaluator:
     
     def evaluate(self) -> dict:
         metrics = {
-            "map": BatchMeter(),
-            "map_50": BatchMeter(),
-            "map_75": BatchMeter()
+            "map": AverageMeter(),
+            "map_50": AverageMeter(),
+            "map_75": AverageMeter()
         }
         self.model.eval()
         for (images, labels) in tqdm(self.valid_loader):
@@ -67,7 +67,7 @@ class Evaluator:
         metrics['map_50'].update(avg_acc['map_50'])
         metrics['map_75'].update(avg_acc['map_75'])
 
-        logger.info(f'map: {metrics["map"].get_value("mean"): .3f} - map_50: {metrics["map_50"].get_value("mean"): .3f} - map_75: {metrics["map_75"].get_value("mean"): .3f}')
+        logger.info(f'map: {metrics["map"].avg: .3f} - map_50: {metrics["map_50"].avg: .3f} - map_75: {metrics["map_75"].avg: .3f}')
         self.acc.map_mt.reset()
         
         return metrics
@@ -89,7 +89,7 @@ def cli():
 
 if __name__ == "__main__":
     args = cli()
-    valid_dataset = ICDAR2015Dataset(mode="Eval")
+    valid_dataset = TotalTextDataset(mode="Eval")
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
     evaluate = Evaluator(valid_dataset, model)

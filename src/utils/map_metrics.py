@@ -11,31 +11,23 @@ from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from shapely.geometry import Polygon
 
 
-class BatchMeter(object):
-    """Calculate average/sum value after each time
-    """
-    def __init__(self) -> None:
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
         self.reset()
-    
+
     def reset(self):
+        self.val = 0
         self.avg = 0
         self.sum = 0
-        self.value = 0
         self.count = 0
-    
-    def update(self, value, n=1):
-        self.value = value
-        self.sum += value * n
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
-        
-    def get_value(self, summary_type=None):
-        if summary_type == 'mean':
-            return self.avg
-        elif summary_type == 'sum':
-            return self.sum
-        else:
-           return self.value
+        return self
 
 
 class AccTorchMetric(object):

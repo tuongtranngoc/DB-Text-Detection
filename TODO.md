@@ -1,5 +1,8 @@
-1. Dataset + docs, Visualization
-2. Networks, docs
-3. Loss function + docs
-4. Train, Eval, Predict
-5. Pytorch lightning module
+1. <del>Dataset + docs, Visualization
+2. <del>Networks, docs
+3. <del>Loss function + docs
+4. <del>Train, Eval, Predict
+5. <del>Prediction: draw polygon results, viddeo inference
+6. Pytorch lightning module
+7. Add Text recongition
+8. Export model and deploy
