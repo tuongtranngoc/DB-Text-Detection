@@ -17,7 +17,7 @@ from src.utils.logger import Logger
 from src.utils.data_utils import DataUtils
 from src.data.total_text import TotalTextDataset
 from src.utils.post_processing import DBPostProcess
-from src.utils.metrics import AverageMeter, AccTorchMetric
+from src.utils.map_metrics import AverageMeter, AccTorchMetric
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
 
@@ -89,7 +89,7 @@ def cli():
 
 if __name__ == "__main__":
     args = cli()
-    valid_dataset = ICDAR2015Dataset(mode="Eval")
+    valid_dataset = TotalTextDataset(mode="Eval")
     model = DiffBinarization()
     model.load_state_dict(torch.load(args.model_path, map_location=args.device)['model'])
     evaluate = Evaluator(valid_dataset, model)

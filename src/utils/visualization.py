@@ -17,7 +17,7 @@ class Visualization:
     device = cfg['Global']['device']
     
     @classmethod
-    def draw_polygon(cls, image, polygon, color=(255, 0, 0)):
+    def draw_polygon(cls, image, polygon, color=(0, 0, 255)):
         # polygon: x1, y1, x2, y2, x3, y3, x4, y4
         isClosed = True
         thickness = 2

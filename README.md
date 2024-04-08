@@ -63,12 +63,22 @@ python -m src.predict --image_path images/example.jpg
 ```
 
 <p align="center">
-    <img src="images/example.jpg">
+    <img src="images/test1.png">
 </p>
+
+<p align="center">
+    <img src="images/test2.png">
+</p>
+
 
 ## Experiments
 
 |Export format|image size|mAP|mAP_50|mAP_75| Inference time (RTX3060)|
 |--|--|--|--|--|--|
-|Pytorch|640x640| 26.9 | 54.3 | 23.4 | 0.002s |
+|Pytorch|736x736| 0.36 | 0.65 | 0.36 | 0.002s |
 |TorchScript| 640x640 | - | - | - | - |
+
+## Reference
+
+>+ [https://github.com/MhLiao/DB](https://github.com/MhLiao/DB)
+>+ [Real-time Scene Text Detection with Differentiable Binarization](https://arxiv.org/abs/1911.08947)
