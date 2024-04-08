@@ -18,7 +18,7 @@ pip install -r requirements.txt
 ```
 
 ## Data preparation
-Please download the [ICDAR2015](https://rrc.cvc.uab.es/?ch=4&com=downloads) dataset and set up the folder structure:
+Please download the [ICDAR2015](https://rrc.cvc.uab.es/?ch=4&com=downloads) and [TotalText]() dataset and set up the folder structure:
 
 ```bash
 dataset/icdar2015
@@ -75,8 +75,8 @@ python -m src.predict --image_path images/example.jpg
 
 |Export format|image size|mAP|mAP_50|mAP_75| Inference time (RTX3060)|
 |--|--|--|--|--|--|
-|Pytorch|736x736| 0.36 | 0.65 | 0.36 | 0.002s |
-|TorchScript| 640x640 | - | - | - | - |
+|Pytorch|736x736| 0.36 | 0.65 | 0.36 | 0.003s |
+|TorchScript| 736x736 |0.36 | 0.65 | 0.36 | 0.0018s |
 
 ## Reference
 
