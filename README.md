@@ -73,10 +73,13 @@ python -m src.predict --image_path images/example.jpg
 
 ## Experiments
 
-|Export format|image size|mAP|mAP_50|mAP_75| Inference time (RTX3060)|
-|--|--|--|--|--|--|
-|Pytorch|736x736| 0.36 | 0.65 | 0.36 | 0.003s |
-|TorchScript| 736x736 |0.36 | 0.65 | 0.36 | 0.0018s |
+|Export format|image size|mAP|mAP_50|mAP_75| Inference time (RTX3060)| learning rate |
+|--|--|--|--|--|--|--|
+|Pytorch - ResNet18|736x736| 0.36 | 0.65 | 0.36 | 0.003s | 0.0005 |
+|TorchScript - ResNet18| 736x736 |0.36 | 0.65 | 0.36 | 0.0018s | - |
+|Pytorch - ResNet50|736x736| 0.39 | 0.69 | 0.40 | 0.003s | 0.007 |
+|TorchScript - ResNet18| 736x736 | 0.39 | 0.69 | 0.40  | 0.004s | - |
+
 
 ## Reference
 

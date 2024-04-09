@@ -74,6 +74,7 @@ class DBPostProcess():
                 continue
         
             box = box.reshape(-1, 2)
+            if box.shape[0] == 0: continue
             box, sside = self.get_mini_boxes(box.reshape((-1, 1, 2)))
             if sside < self.min_size + 2: continue
             box = np.array(box)

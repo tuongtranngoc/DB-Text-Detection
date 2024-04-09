@@ -3,26 +3,25 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import glob
 import argparse
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from . import config as cfg
+from src import config as cfg
 from .evaluate import Evaluator
 
-from src.utils.logger import Logger
-from src.utils.map_metrics import AverageMeter
+from src.utils.logger import logger, set_logger_tag
 from src.utils.data_utils import DataUtils
 from src.utils.tensorboard import Tensorboard
+from src.utils.map_metrics import AverageMeter
 from src.data.total_text import TotalTextDataset
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
 
 
-logger = Logger.get_logger("TRAINING")
+set_logger_tag(logger, tag='TRAINING')
 
 
 class Trainer:
