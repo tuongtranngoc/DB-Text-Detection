@@ -103,6 +103,6 @@ def cli():
 if __name__ == "__main__":
     args = cli()
     predictor = Predictor(args)
-    for _ in range(10):
+    for __ in range(10):
         predictor.predict(args.image_path)
     

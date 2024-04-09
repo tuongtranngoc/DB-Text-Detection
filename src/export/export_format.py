@@ -31,7 +31,7 @@ class Exporter:
         logger.info(f'Optimizing for mobile...')
         ts.save(f)
         return f
-    
+
     def __call__(self):
         logger.info("Begining export model ...")
         self.export_torchscript()
