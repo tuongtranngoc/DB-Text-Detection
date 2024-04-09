@@ -13,7 +13,7 @@ import numpy as np
 from pathlib import Path
 
 from src import config as cfg
-from src.utils.logger import Logger
+from src.utils.logger import logger, set_logger_tag
 from src.utils.data_utils import DataUtils
 from src.utils.visualization import Visualization
 from src.utils.post_processing import DBPostProcess
@@ -22,8 +22,7 @@ from src.models.diff_binarization import DiffBinarization
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
-logger = Logger.get_logger("PREDICTION")
-
+set_logger_tag(logger, tag='PREDICTION')
 
 class Predictor:
     def __init__(self, args) -> None:
@@ -92,7 +91,7 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--save_dir", type=str, default=cfg['Debug']['prediction'])
     parser.add_argument("--image_path", type=str, default=None, help="Path to image file")
-    parser.add_argument("--threshold", type=str, default=0.7, help="Bounding box threshold")
+    parser.add_argument("--threshold", type=str, default=0.5, help="Bounding box threshold")
     parser.add_argument("--device", type=str, default='cuda', help="device inference (cuda or cpu)")
     parser.add_argument("--use_jit", nargs='?', const=True, default=False, help="Exported format of model to inference")
     parser.add_argument("--model_path", type=str, default=cfg['Train']['checkpoint']['best_path'], help="Path to model checkpoint")

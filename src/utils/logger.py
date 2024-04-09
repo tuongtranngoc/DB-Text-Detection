@@ -2,39 +2,31 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-from logging.handlers import TimedRotatingFileHandler
-import logging
-import sys
 import os
+import sys
+
+from loguru import logger
 
 from . import cfg
 
 
-class Logger:
-    FORMATTER = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    LOG_FILE = cfg['Debug']['log_file']
-    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+def set_logger_tag(logger, tag):
+    logger.configure(extra={"tag": tag})
 
-    @classmethod
-    def get_console_handler(cls):
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(cls.FORMATTER)
-        return console_handler
-    
-    @classmethod
-    def get_file_handler(cls):
-        file_handler = TimedRotatingFileHandler(cls.LOG_FILE, when='midnight')
-        file_handler.setFormatter(cls.FORMATTER)
-        return file_handler
-    
-    @classmethod
-    def get_logger(cls, logger_name):
-        logger = logging.getLogger(logger_name)
-        logger.setLevel(logging.INFO)
-        
-        if not logger.hasHandlers():
-            logger.addHandler(cls.get_console_handler())
-            logger.addHandler(cls.get_file_handler())
 
-        logger.propagate = False
-        return logger
+logfile = f'{os.path.join(cfg["Debug"]["log_dir"], "DB")}' + '_' + '{time:YYYY-MM-DD}.log'
+set_logger_tag(logger, 'DB')
+
+logger_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level: <8}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+    "<yellow>{extra[tag]}</yellow> - <level>{message}</level>"
+)
+_ = logger.remove()
+_ = logger.add(sys.stderr, level='DEBUG', format=logger_format)
+_ = logger.add(logfile,
+               level='DEBUG',
+               format=logger_format,
+               rotation='1 day',
+               retention='90 days')

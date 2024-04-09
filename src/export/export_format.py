@@ -10,7 +10,7 @@ import torch.nn.functional as F
 
 from . import *
 
-logger = Logger.get_logger("EXPORT")
+set_logger_tag(logger, "EXPORT")
 
 
 class Exporter:

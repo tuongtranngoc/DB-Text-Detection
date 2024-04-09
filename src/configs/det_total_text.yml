@@ -3,7 +3,7 @@ Global:
   resume_training: False
 
 Optimizer:
-  lr: 0.0005
+  lr: 0.001
 
 Train:
   dataset:
@@ -49,7 +49,7 @@ Eval:
 
 Debug:
   transforms: debugs/transformation
-  log_file: 'logs/crnn.log'
+  log_dir: 'logs/'
   tensorboard: debugs/tensorboard
   dataset: 'debugs/dataset'
   label_generation: 'debugs/label_generation'
