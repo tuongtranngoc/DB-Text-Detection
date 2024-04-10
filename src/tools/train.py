@@ -12,11 +12,12 @@ from torch.utils.data import DataLoader
 from src import config as cfg
 from .evaluate import Evaluator
 
-from src.utils.logger import logger, set_logger_tag
 from src.utils.data_utils import DataUtils
 from src.utils.tensorboard import Tensorboard
 from src.utils.map_metrics import AverageMeter
 from src.data.total_text import TotalTextDataset
+from src.utils.visualization import Visualization
+from src.utils.logger import logger, set_logger_tag
 from src.models.diff_binarization import DiffBinarization
 from src.models.losses.db_loss import DiffBinarizationLoss
 
@@ -43,7 +44,7 @@ class Trainer:
                                        pin_memory=self.args.pin_memory)
     
     def create_model(self):
-        self.model = DiffBinarization().to(self.args.device)
+        self.model = DiffBinarization(pretrained=True, backbone=cfg['Global']['backbone']).to(self.args.device)
         self.loss_func = DiffBinarizationLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args.lr)
         
@@ -86,7 +87,7 @@ class Trainer:
             logger.info(f"Epoch {epoch} - total_loss: {metrics['total_loss'].avg: .3f} - shrink_maps_loss: {metrics['shrink_maps_loss'].avg: .3f} - thresh_maps_loss: {metrics['thresh_maps_loss'].avg: .3f} - binary_maps_loss: {metrics['binary_maps_loss'].avg: .3f}")
             
             if epoch % self.args.eval_step == 0:
-                accuracy = self.eval.evaluate()
+                accuracy = self.eval.eval_map()
                 current_acc = accuracy['map'].val
                 Tensorboard.add_scalars('eval_acc', epoch, acc=current_acc)
                 
@@ -98,12 +99,16 @@ class Trainer:
             # Save last checkpoint
             last_ckpt_path = self.args.last_ckpt_pth
             self.save_ckpt(last_ckpt_path, self.best_acc, epoch)
-    
+            
+            if cfg['Global']['debug_mode']:
+                Visualization.output_debug(self.valid_dataset, cfg['Debug']['debug_idxs'], self.model, cfg['Debug']['debug_dir'], debug_type='train')
+                Visualization.output_debug(self.train_dataset, cfg['Debug']['debug_idxs'], self.model, cfg['Debug']['debug_dir'], debug_type='valid')
+
     def save_ckpt(self, save_path, best_acc, epoch):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         ckpt_dict = {
             "model": self.model.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
+            "optimizer": self.optimizer.state_dict(), 
             "best_acc": best_acc,
             "epoch": epoch
         }
@@ -123,15 +128,16 @@ def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lr", type=float, default=cfg['Optimizer']['lr'])
     parser.add_argument("--device", type=str, default=cfg['Global']['device'])
-    parser.add_argument("--resume", type=bool, default=cfg['Global']['resume_training'])
+    parser.add_argument("--debug_mode", type=str, default=cfg['Global']['debug_mode'])
     parser.add_argument("--epochs", type=int, default=cfg['Train']['loader']['epochs'])
+    parser.add_argument("--resume", type=bool, default=cfg['Global']['resume_training'])
     parser.add_argument("--shuffle", type=bool, default=cfg['Train']['loader']['shuffle'])
     parser.add_argument("--eval_step", type=int, default=cfg['Train']['loader']['eval_step'])
     parser.add_argument("--batch_size", type=int, default=cfg['Train']['loader']['batch_size'])
     parser.add_argument("--num_workers", type=int, default=cfg['Train']['loader']['num_workers'])
-    parser.add_argument("--pin_memory", type=bool, default=cfg['Train']['loader']['use_shared_memory'])
     parser.add_argument("--last_ckpt_pth", type=str, default=cfg['Train']['checkpoint']['last_path'])
     parser.add_argument("--best_ckpt_pth", type=str, default=cfg['Train']['checkpoint']['best_path'])
+    parser.add_argument("--pin_memory", type=bool, default=cfg['Train']['loader']['use_shared_memory'])
     
     args = parser.parse_args()
     return args

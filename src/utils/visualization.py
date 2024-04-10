@@ -3,8 +3,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+import gc
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -15,6 +17,7 @@ from . import *
 class Visualization:
     C, H, W = cfg['Train']['dataset']['transforms']['image_shape']
     device = cfg['Global']['device']
+    post_process = DBPostProcess()
     
     @classmethod
     def draw_polygon(cls, image, polygon, color=(0, 0, 255)):
@@ -45,8 +48,46 @@ class Visualization:
                    expand_nested=True,
                    save_graph=True,
                    directory=cfg['Debug']['model'],
-                   graph_name='resnet18')
+                   graph_name='resnet34')
+    
+    @classmethod
+    def draw_heatmap(cls, basename, preds, org_img, debug_type=None):
+        if isinstance(org_img , torch.Tensor):
+            org_img = DataUtils.image_to_numpy(org_img)
+        pred_prob = preds[0]
+        pred_prob[pred_prob <= cfg['Global']['prob_threshold']] = 0
+        pred_prob[pred_prob > cfg['Global']['prob_threshold']] = 1
+        scaled_img = ((org_img - org_img.min()) * (1 / (org_img.max() - org_img.min()) * 255)).astype(np.uint8)
+        
+        plt.imshow(scaled_img)
+        plt.imshow(pred_prob)
+        
+        save_dir = os.path.join(cfg['Debug']['debug_dir'], debug_type)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        plt.savefig(os.path.join(save_dir, str(basename) + '_heatmap.png'), dpi=200, bbox_inches='tight')
+        gc.collect()
+        
         
     @classmethod
-    def output_debug(cls, dataset, idxs, model, save_debug):
-        pass
+    def output_debug(cls, dataset, idxs, model, save_dir, debug_type):
+        save_dir = os.path.join(save_dir, debug_type)
+        os.makedirs(save_dir, exist_ok=True)
+        model.eval()
+        for i, idx in enumerate(idxs):
+            img, __ = dataset[idx]
+            img = DataUtils.to_device(img.unsqueeze(0))
+            _img = img.cpu().detach().numpy()
+            preds = model(img)
+            
+            preds = preds.cpu().detach().numpy()
+            cls.draw_heatmap(i, preds[0], img, debug_type=debug_type)
+            boxes, scores = cls.post_process(_img, preds, True)
+            boxes, scores = boxes[0], scores[0]
+            idxs = np.where(np.array(scores)>cfg['Global']['prob_threshold'])[0]
+            boxes = [boxes[i].tolist() for i in idxs]
+            
+            img = DataUtils.image_to_numpy(img)
+            img = Visualization.draw_polygon(img, boxes)
+            os.makedirs(save_dir, exist_ok=True)
+            cv2.imwrite(f"{save_dir}/{i}_pred.png", img)

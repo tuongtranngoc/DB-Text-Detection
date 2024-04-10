@@ -9,11 +9,23 @@ import torch.nn.functional as F
 
 from . import *
 
+set_logger_tag(logger, 'MODEL')
+
 
 class DiffBinarization(nn.Module):
-    def __init__(self, pretrained=True):
+    def __init__(self, pretrained=True, backbone='deformable_resnet50'):
         super(DiffBinarization, self).__init__()
-        self.backbone = deformable_resnet50(pretrained=pretrained, in_channels=3)
+        if backbone == 'deformable_resnet50':
+            self.backbone = deformable_resnet50(pretrained=pretrained, in_channels=3)
+        elif backbone == 'deformable_resnet50':
+            self.backbone = deformable_resnet18(pretrained=pretrained, in_channels=3)
+        elif backbone == 'resnet18':
+            self.backbone = resnet18(pretrained=pretrained, in_channels=3)
+        elif backbone == 'resnet50':
+            self.backbone = resnet50(pretrained=pretrained, in_channels=3)
+        else:
+            logger.warning(f'Not exist backbone {backbone}')
+            
         self.neck = NeckDB(self.backbone.out_channels)
         self.head = HeadDB(self.neck.out_channels)
     

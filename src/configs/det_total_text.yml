@@ -1,6 +1,9 @@
 Global:
   device: cuda
+  backbone: 'deformable_resnet50'
   resume_training: False
+  prob_threshold: 0.6
+  debug_mode: True
 
 Optimizer:
   lr: 0.001
@@ -48,10 +51,12 @@ Eval:
     use_shared_memory: False
 
 Debug:
+  debug_idxs: [1,2,3,4,5]
   transforms: debugs/transformation
   log_dir: 'logs/'
   tensorboard: debugs/tensorboard
   dataset: 'debugs/dataset'
+  debug_dir: 'debugs/training'
   label_generation: 'debugs/label_generation'
   validate_polygons: 'debugs/validate_polygons'
   prediction: 'outputs'
