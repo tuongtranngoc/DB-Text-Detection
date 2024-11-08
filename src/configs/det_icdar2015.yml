@@ -3,7 +3,7 @@ Global:
   resume_training: False
 
 Optimizer:
-  lr: 0.001
+  lr: 0.0007
 
 Train:
   dataset:

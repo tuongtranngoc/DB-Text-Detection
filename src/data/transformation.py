@@ -24,14 +24,14 @@ class TransformDB(object):
         
         # image augmentation
         self.__augment = A.Compose(transforms=[
-            A.ToGray(p=0.1),
+            A.ToGray(p=0.3),
             A.HorizontalFlip(p=0.3),
-            A.Affine(p=0.3, rotate=20),
+            A.Affine(p=0.3, rotate=(-30, 30)),
             A.Blur(p=0.3, blur_limit=5),
             A.RandomBrightnessContrast(p=0.3),
-            A.MedianBlur(p=0.1, blur_limit=5),
+            A.MedianBlur(p=0.3, blur_limit=5),
             A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=20, val_shift_limit=20, p=0.3),
-            # A.RandomCrop(height=184, width=184, p=0.3)
+            A.ZoomBlur(p=0.3),
             ], p=0.55,
         keypoint_params=A.KeypointParams(format='xy', remove_invisible=False))
     

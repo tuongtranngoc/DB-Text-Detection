@@ -81,7 +81,7 @@ class Visualization:
             preds = model(img)
             
             preds = preds.cpu().detach().numpy()
-            cls.draw_heatmap(i, preds[0], img, debug_type=debug_type)
+            # cls.draw_heatmap(i, preds[0], img, debug_type=debug_type)
             boxes, scores = cls.post_process(_img, preds, True)
             boxes, scores = boxes[0], scores[0]
             idxs = np.where(np.array(scores)>cfg['Global']['prob_threshold'])[0]

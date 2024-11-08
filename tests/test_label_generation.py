@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from . import *
 from tqdm import tqdm
-from src.data.dataset import ICDAR2015Dataset
+from src.data.icdar15 import ICDAR2015Dataset
 
 
 dataset = ICDAR2015Dataset('Eval')
